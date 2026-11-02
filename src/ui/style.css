@@ -1865,3 +1865,106 @@ img.fun-host {
     font-size: 7px;
   }
 }
+
+/* v2.2: primary actions first; advanced tools are optional and readable while paused. */
+.more-tools {
+  border-style: dashed;
+  min-width: 98px;
+  justify-content: center;
+  text-align: center;
+}
+.more-tools span {
+  font-size: 11px;
+}
+.advanced-tool-grid {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+.advanced-tool {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border: 1px solid #617889;
+  background: #203348;
+  text-align: left;
+  min-height: 86px;
+}
+.advanced-tool strong {
+  color: #a9f4ce;
+  font-size: 14px;
+}
+.advanced-tool span {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #dbe5e1;
+}
+.advanced-tool small {
+  font-size: 10px;
+  color: #ffdfa1;
+}
+.advanced-tool:disabled {
+  opacity: 0.55;
+}
+#toast.coach-tip {
+  position: relative;
+  padding-right: 48px;
+}
+#toast.coach-tip .toast-sigil {
+  display: none;
+}
+#toast.coach-tip #toast-title {
+  display: block;
+  padding-right: 34px;
+}
+#tip-dismiss {
+  position: absolute;
+  right: 0;
+  top: 0;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 20px;
+  color: #a9f4ce;
+}
+.incident-report {
+  text-align: left;
+  margin-top: 16px;
+  border-top: 1px solid #46586b;
+  padding-top: 12px;
+}
+.incident-report summary {
+  cursor: pointer;
+  color: #a9f4ce;
+  font-size: 11px;
+  min-height: 30px;
+}
+.incident-report ul {
+  padding-left: 18px;
+  color: #d2dedb;
+  font-size: 11px;
+  line-height: 1.8;
+}
+@media (max-width: 600px) {
+  #ability-bar {
+    display: grid;
+    grid-template-columns: repeat(var(--primary-count, 3), minmax(0, 1fr));
+    gap: 5px;
+  }
+  #ability-bar > .ability {
+    min-width: 0;
+    justify-content: center;
+    padding: 7px 4px;
+  }
+  #ability-bar > .ability kbd {
+    display: none;
+  }
+  #ability-bar > .ability > span {
+    font-size: 12px;
+  }
+  #ability-bar > .ability small {
+    font-size: 9px;
+  }
+  .more-tools span {
+    font-size: 11px !important;
+  }
+}

@@ -1,0 +1,64 @@
+
+> the-great-office-escape@2.2.0 test:campaign
+> node scripts/campaign-playtest.mjs
+
+ESCAPED {
+  level: 1,
+  attempt: 1,
+  win: true,
+  time: 30.583333333332877,
+  bs: 16,
+  spots: 0,
+  hits: 1,
+  dodges: 1,
+  route: 'lift',
+  realInputsOnly: true
+}
+ESCAPED {
+  level: 2,
+  attempt: 1,
+  win: true,
+  time: 36.1166666666659,
+  bs: 10,
+  spots: 2,
+  hits: 1,
+  dodges: 1,
+  route: 'lift',
+  realInputsOnly: true
+}
+ESCAPED {
+  level: 3,
+  attempt: 1,
+  win: true,
+  time: 42.03333333333223,
+  bs: 12,
+  spots: 2,
+  hits: 1,
+  dodges: 1,
+  route: 'lift',
+  realInputsOnly: true
+}
+ESCAPED {
+  level: 4,
+  attempt: 1,
+  win: true,
+  time: 47.816666666665235,
+  bs: 55,
+  spots: 7,
+  hits: 3,
+  dodges: 0,
+  route: 'lift',
+  realInputsOnly: true
+}
+ESCAPED {
+  level: 5,
+  attempt: 1,
+  win: true,
+  time: 49.766666666665124,
+  bs: 25,
+  spots: 6,
+  hits: 2,
+  dodges: 1,
+  route: 'lift',
+  realInputsOnly: true
+}

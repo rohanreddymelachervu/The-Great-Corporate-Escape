@@ -1035,7 +1035,7 @@ for (const level of LEVELS) {
   level.required = [];
   level.brief = briefs[level.id - 1];
   level.tip =
-    "Gold arrow → lift. E to call. SPACE dodges. Pink/purple warning shapes tell you what is about to hit. Cover, coffee and side switches are real counterplay.";
+    "Gold arrow → lift. E to call. SPACE dodges. Outlined shapes warn; filled areas are dangerous. Cover, coffee and side switches are real counterplay.";
   level.par = 50 + level.id * 10;
   for (const i of level.interactions)
     if (i.type === "switch") {

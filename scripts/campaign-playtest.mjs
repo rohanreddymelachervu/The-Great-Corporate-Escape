@@ -147,6 +147,7 @@ async function defend(s) {
     seen = near.some((e) => e.state === "chase");
   if (!seen) return;
   if (
+    !process.env.SIMPLE_CONTROLS &&
     s.level >= 4 &&
     !s.cooldowns.vpn &&
     s.incidents.some((h) => h.age >= h.warn)
@@ -156,6 +157,7 @@ async function defend(s) {
     return;
   }
   if (
+    !process.env.SIMPLE_CONTROLS &&
     s.level >= 3 &&
     !s.cooldowns.calendar &&
     near.some((e) => dist(e, s.pos) < 75)
@@ -424,7 +426,13 @@ try {
   await writeFile(
     "test-results/campaign-playtest.json",
     JSON.stringify(
-      { ruleset: 2, checkedAt: new Date().toISOString(), errors, results },
+      {
+        ruleset: 2,
+        simpleControls: !!process.env.SIMPLE_CONTROLS,
+        checkedAt: new Date().toISOString(),
+        errors,
+        results,
+      },
       null,
       2,
     ),

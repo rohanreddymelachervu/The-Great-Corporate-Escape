@@ -28,6 +28,59 @@ export function drawMeetingTraffic(
       .setFlipX(Math.cos(person.angle) < 0)
       .setDepth(40 + person.y / 1000)
       .setAlpha(person.distracted > 0 ? 0.55 : 1);
+    // These are poses only: traffic speed, timers, sight and collision are untouched.
+    const frozen = !!scene.active.vpn;
+    const moving = person.phase === "leaving" || person.phase === "returning";
+    const noticing = person.awareness > 0.15;
+    sprite.setAngle(
+      scene.reducedMotion || frozen
+        ? 0
+        : moving
+          ? Math.sin(scene.elapsed * 11 + person.x) * 1.2
+          : person.phase === "inside"
+            ? Math.sin(scene.elapsed * 3 + person.id.length) * 1.3
+            : 0,
+    );
+    if (!frozen) {
+      const side = Math.cos(person.angle) < 0 ? -1 : 1,
+        hand = scene.reducedMotion
+          ? 0
+          : Math.sin(scene.elapsed * (noticing ? 7 : 3) + person.x) * 2;
+      if (noticing) {
+        g.lineStyle(3, 0x81a6b8, 1).lineBetween(
+          person.x + side * 8,
+          person.y + 1,
+          person.x + side * 17,
+          person.y - 7 + hand,
+        );
+        g.fillStyle(0xe4c6b0, 1).fillRect(
+          person.x + side * 17 - 2,
+          person.y - 9 + hand,
+          4,
+          4,
+        );
+        g.fillStyle(0xffd18a, 1)
+          .fillRect(person.x - 1, person.y - 34, 3, 7)
+          .fillRect(person.x - 1, person.y - 24, 3, 3);
+      } else if (person.phase === "inside") {
+        g.fillStyle(0x22364c, 1).fillRect(person.x - 8, person.y + 4, 15, 8);
+        g.fillStyle(0xc9dfd8, 1).fillRect(person.x - 6, person.y + 5, 11, 5);
+        g.lineStyle(3, 0x81a6b8, 1).lineBetween(
+          person.x + 8,
+          person.y,
+          person.x + 15,
+          person.y - 5 + hand,
+        );
+      } else if (moving) {
+        g.lineStyle(3, 0x81a6b8, 1).lineBetween(
+          person.x - side * 8,
+          person.y,
+          person.x - side * 12,
+          person.y + 7 + hand,
+        );
+      }
+    }
+
     if (person.phase !== "inside" && person.distracted <= 0) {
       const points: { x: number; y: number }[] = [{ x: person.x, y: person.y }];
       for (
@@ -52,10 +105,10 @@ export function drawMeetingTraffic(
           y: person.y + Math.sin(a) * range,
         });
       }
-      g.fillStyle(
-        person.awareness > 0.3 ? 0xffc78c : 0x98c0c9,
-        person.awareness > 0.3 ? 0.13 : 0.045,
-      ).fillPoints(points, true);
+      g.fillStyle(0xff7e8c, person.awareness > 0.3 ? 0.13 : 0.045).fillPoints(
+        points,
+        true,
+      );
     }
     if (person.awareness > 0.05) {
       g.lineStyle(3, person.awareness > 0.8 ? 0xff8f92 : 0xffdb94, 0.85)

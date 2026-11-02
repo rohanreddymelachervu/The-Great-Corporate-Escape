@@ -312,8 +312,10 @@ test("WFH remains a real creative alternative to waiting for the lift", async ({
   await ready(page);
   await start(page, 5);
   await position(page, 1000, 440);
+  expect((await state(page)).wfhActive).toBe(true);
+  await expect(page.locator("#objectives")).toContainText("PURPLE EXIT");
   await page.keyboard.press("6");
-  await expect(page.locator("#ability-wfh")).toHaveText("APPROVED");
+  expect((await state(page)).wfhActive).toBe(true);
   await position(page, 1035, 705);
   await expect(
     page.getByRole("heading", { name: "YOU HAVE A LIFE." }),

@@ -1,4 +1,4 @@
-# THE GREAT OFFICE ESCAPE: 4:59 PM — Office Heist v2.1
+# THE GREAT OFFICE ESCAPE: 4:59 PM — Clearer Escapes v2.2
 
 > You've finished your work. Unfortunately, nobody else has.
 
@@ -6,9 +6,22 @@ A client-side Phaser 3 + TypeScript + Vite office-escape game. No backend, accou
 
 **Preview:** https://hyperagent.com/s/0RA76fgitXB1NI7B7D0-mA
 
-**Deployable GitHub Pages build:** `docs/index.html` on `main`. The source and rebuilt `docs` are committed to the existing `rohanreddymelachervu/The-Great-Corporate-Escape-` repository. This update does not change hosting settings; redeploy your existing Pages setup from that folder.
+**Deployable GitHub Pages build:** `docs/index.html` on `main`. The source and rebuilt `docs` are committed to the existing `rohanreddymelachervu/The-Great-Corporate-Escape` repository. This update does not change hosting settings; redeploy your existing Pages setup from that folder.
 
-## New in v2.1: a bigger office, real loot and event cutaways
+## New in v2.2: more personality, less homework
+
+The underlying v2.1 difficulty tuning is retained: enemy speeds/damage/vision, tool cooldowns/durations, lift waits, maps, patrol routes, staff counts and meeting schedules are regression-tested against qa-evidence/difficulty-v21.json. No stronger enemies or compensating difficulty buffs were added.
+
+- **Core actions first:** move, E to use/hold to steal, Space to dodge. Throw Coffee and Fake Call stay on the main strip. More Tools pauses the office and explains optional Look Busy (stay still), Meeting Shield and Office Freeze; choosing a ready tool returns to play and activates it. Shortcuts 3–5 still work directly.
+- **Brief, optional context tips:** one useful hint when relevant, no compulsory tutorial or pause. Dismiss it or turn Context tips off in Settings. Learned tips are remembered locally.
+- **One visual grammar:** gold arrow = objective, mint = interaction, common red cones = vision, outlined hazard = warning and filled hazard = active. Characters keep their own clothing/name colours.
+- **Less label clutter:** only the current E target or steal in progress displays its detailed loot label. The highlighted object matches the action E will actually take.
+- **Automatic WFH:** picking up the purple house token opens the alternate exit immediately; no numbered activation is required. The arrow reroutes, and the regular lift remains usable too. Old key 6 simply explains the status.
+- **Intern meets founder:** where both existing characters are present, a safe natural encounter or a coffee-assisted meetup can turn into an eight-second pitch. They physically approach, face each other, gesture, show a tiny AGENT demo and exchange scripted lines. Both are occupied rather than attacking you. There is no new key, dialogue tree, actor spawn or forced camera. This is a limited breather, not another threat.
+- **Meeting-room reactions:** existing colleagues retain the same walkout/return schedules and spotting rules, with clearer hand, walking and noticing poses.
+- **Incident report:** an optional collapsed recap after a run uses actual loot/hit/dodge/coffee/conversation counters. The existing Share button shares the report. No runtime AI, new meter or extra scoring system.
+
+## Office heist content retained from v2.1
 
 All five floors are now **1600×1120**, twice the old world area. Ten enclosed meeting rooms connect to the existing office through new lounges, pantry areas, service corridors and broad doorways. Amber lights warn when meetings end; attendees physically walk out, can spot you and alert major enemies, ask one quick question, then walk back in. They do not teleport into hallways or detect through walls.
 
@@ -46,12 +59,12 @@ Lift waits are 20 / 26 / 30 / 34 / 38 seconds across the five floors. Side switc
 
 ## The interference has counterplay
 
-- **HR photo charge:** HR stops, draws a pink locked-aim line, then lunges at that recorded position. Dodge sideways. She cannot home during the charge or go through furniture.
-- **Pink photo sweep:** a warning lane precedes the moving beam. Step out of its lane or time a dodge through it.
-- **Orange meeting zone:** move away before the calendar circle arms.
-- **Purple yap:** leave the marked ring. The intern also moves quickly and slows nearby employees with his monologue.
+- **HR photo charge:** HR stops, draws a locked-aim line, then lunges at that recorded position. Dodge sideways. She cannot home during the charge or go through furniture.
+- **Photo sweep:** a warning lane precedes the moving beam. Step out of its lane or time a dodge through it.
+- **Meeting zone:** move away before the calendar circle arms.
+- **Intern yap:** leave the marked ring. The intern also moves quickly and slows nearby employees with his monologue.
 - **Friday paperwork:** stacks cross a telegraphed path. Move aside, use cover or dodge.
-- **Founder All Hands:** get out of the gold circle. The whistle redirects the office and expands awareness temporarily. The founder ignores fake calls.
+- **Founder All Hands:** get out of the marked circle. The whistle redirects the office and expands awareness temporarily. The founder ignores fake calls.
 - **Manager / PM:** catching you during a lift wait can add a one-time four / three second delay respectively. They cannot delay it forever.
 - **Gossip:** discovery broadcasts your last known position to nearby colleagues.
 
@@ -68,11 +81,11 @@ Getting caught builds **Corporate BS**. At 100%, you are promoted to staying lat
 | Dodge | Space | DASH |
 | Call lift / use a nearby tool / hide | E | ACT |
 | Throw coffee ahead | 1 | COFFEE |
-| Fake client call | 2 | CLIENT CALL |
-| Stationary Slack camouflage | 3 | BUSY |
-| Calendar blocker | 4 | CALENDAR |
-| VPN disconnect | 5 | VPN |
-| Emergency WFH approval | 6 | WFH |
+| Fake Call | 2 | CLIENT CALL |
+| Look Busy — stay still (More Tools) | 3 | BUSY |
+| Meeting Shield (More Tools) | 4 | CALENDAR |
+| Office Freeze (More Tools) | 5 | VPN |
+| WFH exit | Pick up a purple house token; walk into its exit | Same |
 | Pause | Escape / pause button | Pause button |
 | Mute | M / sound button | Sound button |
 
@@ -82,7 +95,7 @@ Coffee now diverts **at most two nearby colleagues**, and a close pursuer who st
 
 Fake calls last five seconds and slow your movement; founder and intern ignore them. Calendar immunity lasts 3.5 seconds. VPN clears live hazards and stops enemies for two seconds while the lift continues coming. Camouflage requires remaining stationary. Tools unlock progressively by floor.
 
-Purple hide spots offer **six seconds of cover**, then expire and need a cooldown. You cannot hide through an entire lift wait. Hiding, pantry coffee and optional sabotage are useful choices rather than mandatory fetch steps.
+House-shaped hiding markers offer **six seconds of cover**, then expire and need a cooldown. You cannot hide through an entire lift wait. Hiding, pantry coffee and optional sabotage are useful choices rather than mandatory fetch steps.
 
 The HUD, map and controls occupy separate grid regions. Only the current objective and one nearby NPC speaker are shown. Portrait and landscape touch layouts retain the same rules. Audio starts after a gesture and provides separate music/SFX volume controls and mute. Reduced-motion settings disable camera shake and dash ghosts. Losing focus pauses the run.
 
@@ -125,12 +138,13 @@ npx playwright install chromium
 npm run test:browser
 npm run test:release
 npm run test:campaign
+# Optional: SIMPLE_CONTROLS=1 npm run test:campaign skips advanced tools
 ```
 
 `CHROMIUM_PATH` optionally selects an existing Chromium executable. Otherwise Playwright uses its managed browser.
 
-- **707 unit/data tests:** geometry, navigation, saves, RNG, maps, sixty-three encounter-director checks, seventy-two enemy checks, thirty-two meeting-traffic checks, twenty loot checks, HR rhythm logic and legacy-score migration.
-- **38 browser journeys:** actual keyboard and touch dodges, arrow/WASD movement, windup/locked-aim behavior, warnings before hits, real hazard dodge credit, camping consequences, lift timing/boarding, optional sabotage, recovery, alternative WFH, loss/retry, settings, daily seed, responsive bounds HR activity success/failure, all eight animated hit scenes, lethal-hit recovery, long-haul skipping, held theft, snack recovery, bank/loss rules and real meeting-room walkouts.
+- **739 unit/data tests:** geometry, navigation, saves, RNG, maps, sixty-three encounter-director checks, seventy-two enemy checks, thirty-two meeting-traffic checks, twenty loot checks, HR rhythm logic legacy-score migration, a twenty-one-check social model, and eleven UX/difficulty/report checks.
+- **47 browser journeys:** actual keyboard and touch dodges, arrow/WASD movement, windup/locked-aim behavior, warnings before hits, real hazard dodge credit, camping consequences, lift timing/boarding, optional sabotage, recovery, alternative WFH, loss/retry, settings, daily seed, responsive bounds HR activity success/failure, all eight animated hit scenes, lethal-hit recovery, long-haul skipping, held theft, snack recovery, bank/loss rules and real meeting-room walkouts.
 - **Three offline production checks:** desktop plus portrait/landscape touch startup, input, dodge, coffee and pause with network disabled and no production QA helpers.
 - **Real-input production campaign:** the map-aware controller plays all five floors without positioning, health, timer or win hooks. It can attempt a floor at most three times, using actual optional sabotage after a failed attempt; failures are recorded, not hidden. Focused development runs may explicitly skip unlocks, but full production runs do not.
 
@@ -147,6 +161,10 @@ src/game/loot.ts             Run-local bag, timed theft, points and carrying rul
 src/game/render-traffic.ts   Staff animation, clipped vision and amber doorway cues
 src/game/render-incidents.ts World hazard telegraphs, HR charge cues and lift feedback
 src/game/enemy.ts            Patrol/investigate/chase/search FSM, HR locked-aim lunge
+src/game/social.ts           Bounded harmless intern–founder meetup and conversation
+src/game/render-social.ts    Actual-world character gestures and animated pitch
+src/game/coach.ts            Non-blocking contextual advice only
+src/game/report.ts           Factual deterministic incident recap
 src/game/logic.ts            Swept collision, LOS/FOV, radius-inflated A*, RNG, score
 src/game/levels.ts           Five office layouts, optional tactics and enemy routes
 src/game/catalog.ts          Tuning, dialogue, abilities and achievements

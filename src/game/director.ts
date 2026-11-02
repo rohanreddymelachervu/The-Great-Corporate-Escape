@@ -64,7 +64,7 @@ const PATTERNS: readonly (readonly IncidentKind[])[] = [
 const COPY: Record<IncidentKind, { title: string; text: string }> = {
   photo: {
     title: "HR TEAM PHOTO",
-    text: "Pink line incoming. SPACE dodge through it, or step aside.",
+    text: "A photo sweep is lining up. SPACE dodge through it, or step aside.",
   },
   meeting: {
     title: "QUICK SYNC",
@@ -80,7 +80,7 @@ const COPY: Record<IncidentKind, { title: string; text: string }> = {
   },
   allhands: {
     title: "SURPRISE ALL-HANDS",
-    text: "Gold ring means compulsory inspiration. Leave the circle before the founder starts.",
+    text: "All-hands circle incoming. Step out before the outlined area fills.",
   },
 };
 

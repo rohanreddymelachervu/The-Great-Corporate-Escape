@@ -1,0 +1,53 @@
+
+> the-great-office-escape@2.2.0 test:release
+> node scripts/release-smoke.mjs
+
+{
+  "ruleset": 2,
+  "url": "file:///agent/workspace/office-escape/release/office-escape.html",
+  "checkedAt": "2026-11-02T13:29:53.856Z",
+  "reports": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "mobile": false,
+      "dodgeDistance": 85.08333333333334,
+      "coffeeConsumed": true,
+      "phase": "find-lift",
+      "qaAvailable": false,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mobile": true,
+      "dodgeDistance": 131.58333333333331,
+      "coffeeConsumed": true,
+      "phase": "find-lift",
+      "qaAvailable": false,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mobile": true,
+      "dodgeDistance": 131.58333333333331,
+      "coffeeConsumed": true,
+      "phase": "find-lift",
+      "qaAvailable": false,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "errors": []
+    }
+  ]
+}

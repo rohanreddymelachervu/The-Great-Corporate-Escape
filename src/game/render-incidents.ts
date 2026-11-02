@@ -35,7 +35,7 @@ export function drawInterference(
     }
   for (const h of director.incidents) {
     const warning = h.age < h.warn,
-      color = COLORS[h.kind],
+      color = warning ? 0xffd18a : 0xff7e8c,
       pulse = 0.55 + Math.sin(scene.elapsed * 11) * 0.2;
     if (h.shape === "beam") {
       if (warning) {
@@ -167,12 +167,12 @@ export function drawInterference(
       g.fillStyle(0xa9f4ce).fillEllipse(e.x + 13, e.y - 44, 10, 13);
     }
     if (e.specialPhase === "photo-windup" && e.aim) {
-      g.lineStyle(3, 0xff87bd, 0.8).lineBetween(e.x, e.y, e.aim.x, e.aim.y);
-      g.lineStyle(3, 0xffd3e8).strokeCircle(e.aim.x, e.aim.y, 23);
-      g.fillStyle(0xffb7d8, 0.13).fillCircle(e.aim.x, e.aim.y, 23);
+      g.lineStyle(3, 0xffd18a, 0.8).lineBetween(e.x, e.y, e.aim.x, e.aim.y);
+      g.lineStyle(3, 0xffd18a).strokeCircle(e.aim.x, e.aim.y, 23);
+      g.fillStyle(0xffd18a, 0.08).fillCircle(e.aim.x, e.aim.y, 23);
     }
     if (e.specialPhase === "photo-charge")
-      g.lineStyle(3, 0xff8fca, 0.8).strokeCircle(e.x, e.y, 22);
+      g.lineStyle(3, 0xff7e8c, 0.8).strokeCircle(e.x, e.y, 22);
   }
   const exit = center(scene.level.exit);
   if (director.phase === "waiting") {

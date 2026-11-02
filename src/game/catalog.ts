@@ -116,8 +116,8 @@ export const ABILITIES: Record<
   }
 > = {
   coffee: {
-    name: "Coffee distraction",
-    short: "COFFEE",
+    name: "Throw Coffee",
+    short: "THROW COFFEE",
     key: "1",
     level: 1,
     cooldown: 5,
@@ -126,8 +126,8 @@ export const ABILITIES: Record<
       "Throw ahead to lure up to two nearby enemies. A pursuer who can still see you only hesitates. Throw around cover!",
   },
   call: {
-    name: "Fake client call",
-    short: "CLIENT CALL",
+    name: "Fake Call",
+    short: "FAKE CALL",
     key: "2",
     level: 2,
     cooldown: 24,
@@ -136,8 +136,8 @@ export const ABILITIES: Record<
       "Managers, HR, PM and gossip defer for 5s. You move slower to sell the call; founder and intern ignore it.",
   },
   slack: {
-    name: "Slack camouflage",
-    short: "BUSY",
+    name: "Look Busy — stay still",
+    short: "LOOK BUSY",
     key: "3",
     level: 3,
     cooldown: 20,
@@ -146,8 +146,8 @@ export const ABILITIES: Record<
       "Stay completely still and look extremely busy. Movement cancels the bluff.",
   },
   calendar: {
-    name: "Calendar blocker",
-    short: "CALENDAR",
+    name: "Meeting Shield",
+    short: "MEETING SHIELD",
     key: "4",
     level: 3,
     cooldown: 30,
@@ -156,8 +156,8 @@ export const ABILITIES: Record<
       "All meetings rejected for 3.5s, even while running. Does not erase suspicion.",
   },
   vpn: {
-    name: "VPN disconnect",
-    short: "VPN",
+    name: "Office Freeze",
+    short: "OFFICE FREEZE",
     key: "5",
     level: 4,
     cooldown: 35,
@@ -173,13 +173,25 @@ export const ABILITIES: Record<
     cooldown: 0,
     duration: 999,
     description:
-      "Use a rare WFH token to open the purple alternate exit. The purple exit bypasses the lift wait.",
+      "A purple house token automatically opens the alternate exit and bypasses the lift wait.",
   },
 };
 export const ACHIEVEMENTS = [
-  {id:'tv',name:'Company Assets, Personal Weekend',text:'Escape with at least one stolen office TV.'},
-  {id:'snacks',name:'Snack Equity Vested',text:'Steal at least two snack stashes and escape.'},
-  {id:'heist',name:'Five-Finger Sprint Planning',text:'Escape with at least 1,500 loot points in your bag.'},
+  {
+    id: "tv",
+    name: "Company Assets, Personal Weekend",
+    text: "Escape with at least one stolen office TV.",
+  },
+  {
+    id: "snacks",
+    name: "Snack Equity Vested",
+    text: "Steal at least two snack stashes and escape.",
+  },
+  {
+    id: "heist",
+    name: "Five-Finger Sprint Planning",
+    text: "Escape with at least 1,500 loot points in your bag.",
+  },
   {
     id: "ghost",
     name: "Professional Ghost",

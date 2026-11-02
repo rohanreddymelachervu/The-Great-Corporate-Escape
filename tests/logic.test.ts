@@ -507,6 +507,7 @@ describe("fresh saves and storage (node-safe mocked localStorage)", () => {
         mute: false,
         reducedMotion: false,
         hitScenes: "brief",
+        tips: true,
       },
       dailyBests: {},
     });

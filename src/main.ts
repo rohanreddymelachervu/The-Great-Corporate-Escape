@@ -15,6 +15,8 @@ import type { Ability, Result, HitEvent } from "./game/types";
 import { playHitScene } from "./ui/hit-scenes";
 import { playFunFriday } from "./ui/fun-ui";
 import type { FunOutcome } from "./ui/fun-ui";
+import { ContextCoach } from "./game/coach";
+import { incidentReport } from "./game/report";
 const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
   document.querySelector<T>(s)!;
 const save = load(),
@@ -137,8 +139,22 @@ function syncMenu() {
   $("#sound-btn").textContent = save.settings.mute ? "MUTED" : "SOUND ON";
 }
 syncMenu();
+let learned: string[] = [];
+try {
+  const data = JSON.parse(localStorage.getItem("office-coach-v22") || "[]");
+  if (Array.isArray(data)) learned = data.filter((x) => typeof x === "string");
+} catch {
+  /* Optional tips never block play. */
+}
+const coach = new ContextCoach(learned);
+$("#tip-dismiss").onclick = () => {
+  $("#toast").hidden = true;
+  $("#game").focus();
+};
 function toast(title: string, text: string, duration = 3.5) {
   if (modalKind === "result") return;
+  $("#toast").classList.remove("coach-tip");
+  $("#tip-dismiss").hidden = true;
   $("#toast-title").textContent = title;
   $("#toast-text").textContent = text;
   $("#toast").hidden = false;
@@ -214,6 +230,7 @@ function start(level: number, daily = false, seedOverride?: string) {
   $("#footer").hidden = true;
   $("#toast").hidden = true;
   document.body.classList.add("playing");
+  coach.resetRun();
   buildAbilities(level);
   const seed = seedOverride ?? (daily ? dailySeed() : `${Date.now()}-${level}`);
   scene.scene.restart({ level, daily, seed, preview: false });
@@ -259,15 +276,24 @@ function goHome() {
   syncMenu();
 }
 function buildAbilities(level: number) {
+  const primary = (["coffee", "call"] as Ability[]).filter(
+    (id) => level >= ABILITIES[id].level,
+  );
+  $("#ability-bar").style.setProperty(
+    "--primary-count",
+    String(primary.length + 1 + (level >= 3 ? 1 : 0)),
+  );
   $("#ability-bar").innerHTML =
-    `<button class="ability dodge-ability" id="dodge-ability" title="Short directional dodge. Avoid HR charges and corporate hazards. Costs 18 stamina. Does not pass through furniture."><kbd>SPACE</kbd><span>DODGE<small id="dash-status">READY</small></span></button>` +
-    (Object.entries(ABILITIES) as [Ability, (typeof ABILITIES)[Ability]][])
-      .filter(([, d]) => level >= d.level)
-      .map(
-        ([id, d]) =>
-          `<button class="ability ${level < d.level ? "locked" : ""}" data-ability="${id}" ${level < d.level ? "disabled" : ""} title="${d.description}" aria-label="${d.name}"><kbd>${d.key}</kbd><span>${d.short}<small id="ability-${id}">${level < d.level ? "FLOOR " + d.level : "READY"}</small></span></button>`,
-      )
-      .join("");
+    `<button class="ability dodge-ability" id="dodge-ability" title="Space / DASH: quick dodge. Furniture still blocks you."><kbd>SPACE</kbd><span>DODGE<small id="dash-status">READY</small></span></button>` +
+    primary
+      .map((id) => {
+        const d = ABILITIES[id];
+        return `<button class="ability" data-ability="${id}" title="${d.description}" aria-label="${d.name}"><kbd>${d.key}</kbd><span>${d.short}<small id="ability-${id}">READY</small></span></button>`;
+      })
+      .join("") +
+    (level >= 3
+      ? '<button class="ability more-tools" id="more-tools" aria-label="More tools"><span>MORE TOOLS<small>OPTIONAL · 3–5</small></span></button>'
+      : "");
   $("#dodge-ability").onclick = () => {
     if (!paused) scene.dash();
   };
@@ -278,6 +304,38 @@ function buildAbilities(level: number) {
         if (!paused) scene.ability(b.dataset.ability as Ability);
       }),
   );
+  if (level >= 3) $("#more-tools").onclick = advancedTools;
+}
+function advancedTools() {
+  const state = scene.snapshot();
+  const tools = (["slack", "calendar", "vpn"] as Ability[]).filter(
+    (id) => scene.level.id >= ABILITIES[id].level,
+  );
+  modal(
+    "tools",
+    `<div class="modal-eyebrow">OFFICE PAUSED · OPTIONAL TOOLS</div><h2>A LITTLE EXTRA<br>UNAVAILABILITY.</h2><p>You can escape with movement, E, Space and your primary tools. These are optional extras; shortcuts 3–5 still work during play.</p><div class="advanced-tool-grid">${tools
+      .map((id) => {
+        const d = ABILITIES[id],
+          cd = state.cooldowns[id] || 0;
+        const bulky = id === "slack" && state.lootWeight >= 3;
+        return `<button class="advanced-tool" data-use-tool="${id}" ${cd > 0 || bulky ? "disabled" : ""}><strong>${d.key} · ${d.name}</strong><span>${d.description}</span><small>${bulky ? "BULKY LOOT CANNOT LOOK BUSY" : cd > 0 ? Math.ceil(cd) + "s cooldown" : "USE & RETURN TO ESCAPE"}</small></button>`;
+      })
+      .join(
+        "",
+      )}</div><div class="modal-actions"><button class="secondary" id="tools-back">BACK WITHOUT USING A TOOL</button></div>`,
+    true,
+  );
+  document.querySelectorAll<HTMLButtonElement>("[data-use-tool]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const id = b.dataset.useTool as Ability;
+        closeModal();
+        scene.events.once(Phaser.Scenes.Events.UPDATE, () => {
+          if (!scene.ended) scene.ability(id);
+        });
+      }),
+  );
+  $("#tools-back").onclick = closeModal;
 }
 window.addEventListener("office:hud", ((e: CustomEvent) => {
   if (!playing) return;
@@ -288,7 +346,7 @@ window.addEventListener("office:hud", ((e: CustomEvent) => {
   $("#timer").textContent = formatTime(h.elapsed);
   $("#run-mode").textContent = h.daily
     ? "DAILY · " + h.seed
-    : "OFFICE HEIST · V2.1";
+    : "OFFICE ESCAPE · V2.2";
   $("#bs-value").textContent = Math.floor(h.bs) + "%";
   $("#bs-bar").style.width = h.bs + "%";
   $("#bs-bar").style.background = h.bs > 70 ? "#ff667f" : "#ff937f";
@@ -309,11 +367,11 @@ window.addEventListener("office:hud", ((e: CustomEvent) => {
   const danger = !!special || !!incoming || h.suspicion > 0.25;
   $("#detection").hidden = !danger || h.hidden;
   const cues: Record<string, string> = {
-    photo: "HR PHOTO: SPACE through the pink sweep.",
-    meeting: "MEETING INVITE: leave the orange circle.",
-    yap: "INFINITE YAP: leave the purple zone.",
+    photo: "PHOTO SWEEP: dodge through or step out of its lane.",
+    meeting: "MEETING INVITE: leave the outlined circle before it fills.",
+    yap: "INFINITE YAP: leave the outlined zone.",
     paper: "FRIDAY DEPLOY: dodge the paper.",
-    allhands: "ALL HANDS: get out of the gold circle.",
+    allhands: "ALL HANDS: get out of the marked circle.",
   };
   $("#detection").textContent = special
     ? "HR PHOTO CHARGE! SPACE sideways now."
@@ -344,13 +402,13 @@ window.addEventListener("office:hud", ((e: CustomEvent) => {
     (h.hidden
       ? "HIDDEN · DECOMPRESSING. −BS."
       : h.active.slack
-        ? "BUSY ON SLACK. DON’T MOVE."
+        ? "LOOK BUSY · stay still. Moving cancels it."
         : h.active.call
           ? "FAKE CLIENT CALL · slower movement; HR and managers defer."
           : h.active.calendar
-            ? "CALENDAR: MEETINGS DECLINED."
+            ? "MEETING SHIELD · keep moving."
             : h.active.vpn
-              ? "VPN DOWN. CORPORATE ACTIVITY PAUSED."
+              ? "OFFICE FREEZE · the lift keeps coming."
               : h.target
                 ? "E · " + h.target.toUpperCase()
                 : h.wfhActive
@@ -387,6 +445,46 @@ window.addEventListener("office:hud", ((e: CustomEvent) => {
       Math.max(0, 100 - (cd / (d.cooldown || 1)) * 100) + "%",
     );
   }
+  const more = document.querySelector<HTMLElement>("#more-tools small");
+  if (more) {
+    const active = (["slack", "calendar", "vpn"] as Ability[]).find(
+      (id) => (h.active[id] || 0) > 0,
+    );
+    more.textContent = active
+      ? "ACTIVE " + Math.ceil(h.active[active]) + "s"
+      : "OPTIONAL · 3–5";
+  }
+  if (
+    save.settings.tips &&
+    !paused &&
+    !scene.ended &&
+    !scene.cinematic &&
+    !modalKind &&
+    $("#toast").hidden
+  ) {
+    const tip = coach.next({
+      elapsed: h.elapsed,
+      phase: h.phase,
+      coffee: h.coffee,
+      suspicion: h.suspicion,
+      lootTarget: h.lootTarget,
+      hidden: h.hidden,
+      danger: danger || h.activeDanger,
+    });
+    if (tip) {
+      toast("TIP · " + tip.title, tip.text, 5);
+      $("#toast").classList.add("coach-tip");
+      $("#tip-dismiss").hidden = false;
+      try {
+        localStorage.setItem(
+          "office-coach-v22",
+          JSON.stringify([...coach.seen]),
+        );
+      } catch {
+        /* No storage is required. */
+      }
+    }
+  }
 }) as EventListener);
 window.addEventListener("office:end", ((e: CustomEvent) =>
   showResult(
@@ -411,7 +509,14 @@ function showResult(
     : VICTORY_LINES[hash(result.seed) % VICTORY_LINES.length];
   modal(
     "result",
-    `<div class="result-hero"><div class="modal-eyebrow">${result.daily ? "DAILY ESCAPE · " + result.seed : win ? "FRIDAY. FINALLY." : "MEETING ACCEPTED. INVOLUNTARILY."}</div><div class="result-icon ${win ? "" : "fail"}">${win ? "↗" : "∞"}</div><h2>${win ? (final ? "YOU HAVE A LIFE." : "OUT OF OFFICE.") : "PROMOTED TO<br>STAYING LATE."}</h2><p>${win ? line : "Congratulations! You’re now Senior Vice President of Staying Late. Your compensation: exposure to another all-hands."}</p>${win ? `<div class="medal">${result.medal.toUpperCase()}</div><div class="score-large">${result.score.toLocaleString()}<small style="font-size:10px;letter-spacing:1px;margin-left:8px">PTS</small></div>` : '<div class="medal">YOUR WEEKEND DESERVES A RETRY.</div>'}${result.lootValue ? `<p class="result-achievements">${win ? "LOOT BANKED" : "LOOT LOST"} · ${result.lootValue.toLocaleString()} PTS</p>` : ""}${result.dodges ? `<p class="result-achievements">${result.dodges} CLUTCH DODGES · +${result.dodges * 125} POINTS</p>` : ""}${result.funScore ? `<p class="result-achievements">HR FUN BONUS · +${result.funScore * 2} POINTS</p>` : ""}<div class="result-stats"><div><b>${formatTime(result.time)}</b><small>TIME</small></div><div><b>${result.spots}</b><small>SPOTTED</small></div><div><b>${result.bs}%</b><small>FINAL BS</small></div><div><b>${result.collectibles}</b><small>STOLEN ITEMS</small></div></div>${newly.length ? `<div class="result-achievements">${newly.map((id) => "UNLOCKED · " + ACHIEVEMENTS.find((a) => a.id === id)?.name).join("<br>")}</div>` : ""}${alt ? "<p>Purple exit approved. Remote work is a state of escape.</p>" : ""}<div class="modal-actions" style="justify-content:center"><button id="result-primary" class="primary">${!win ? "RETRY INSTANTLY ↻" : result.daily || result.level === 5 ? "PLAY AGAIN ↻" : "NEXT FLOOR ↗"}</button><button id="result-retry" class="secondary">${win ? "REPLAY FLOOR" : "MAIN MENU"}</button>${win ? '<button id="share-btn" class="secondary">SHARE RESULT ↗</button>' : '<button id="result-tip" class="secondary">SURVIVAL TIPS</button>'}<button id="result-home" class="secondary">${win ? "MAIN MENU" : "CHOOSE FLOOR"}</button></div><div class="share-status" id="share-status"></div></div>`,
+    `<div class="result-hero"><div class="modal-eyebrow">${result.daily ? "DAILY ESCAPE · " + result.seed : win ? "FRIDAY. FINALLY." : "MEETING ACCEPTED. INVOLUNTARILY."}</div><div class="result-icon ${win ? "" : "fail"}">${win ? "↗" : "∞"}</div><h2>${win ? (final ? "YOU HAVE A LIFE." : "OUT OF OFFICE.") : "PROMOTED TO<br>STAYING LATE."}</h2><p>${win ? line : "Congratulations! You’re now Senior Vice President of Staying Late. Your compensation: exposure to another all-hands."}</p>${win ? `<div class="medal">${result.medal.toUpperCase()}</div><div class="score-large">${result.score.toLocaleString()}<small style="font-size:10px;letter-spacing:1px;margin-left:8px">PTS</small></div>` : '<div class="medal">YOUR WEEKEND DESERVES A RETRY.</div>'}${result.lootValue ? `<p class="result-achievements">${win ? "LOOT BANKED" : "LOOT LOST"} · ${result.lootValue.toLocaleString()} PTS</p>` : ""}${result.dodges ? `<p class="result-achievements">${result.dodges} CLUTCH DODGES · +${result.dodges * 125} POINTS</p>` : ""}${result.funScore ? `<p class="result-achievements">HR FUN BONUS · +${result.funScore * 2} POINTS</p>` : ""}<div class="result-stats"><div><b>${formatTime(result.time)}</b><small>TIME</small></div><div><b>${result.spots}</b><small>SPOTTED</small></div><div><b>${result.bs}%</b><small>FINAL BS</small></div><div><b>${result.collectibles}</b><small>STOLEN ITEMS</small></div></div>${newly.length ? `<div class="result-achievements">${newly.map((id) => "UNLOCKED · " + ACHIEVEMENTS.find((a) => a.id === id)?.name).join("<br>")}</div>` : ""}${alt ? "<p>Purple exit approved. Remote work is a state of escape.</p>" : ""}<div class="modal-actions" style="justify-content:center"><button id="result-primary" class="primary">${!win ? "RETRY INSTANTLY ↻" : result.daily || result.level === 5 ? "PLAY AGAIN ↻" : "NEXT FLOOR ↗"}</button><button id="result-retry" class="secondary">${win ? "REPLAY FLOOR" : "MAIN MENU"}</button>${win ? '<button id="share-btn" class="secondary">SHARE REPORT ↗</button>' : '<button id="result-tip" class="secondary">SURVIVAL TIPS</button>'}<button id="result-home" class="secondary">${win ? "MAIN MENU" : "CHOOSE FLOOR"}</button></div><details class="incident-report"><summary>OFFICIAL INCIDENT REPORT ↓</summary><ul>${incidentReport(
+      result,
+      win,
+    )
+      .map((line) => `<li>${escapeHTML(line)}</li>`)
+      .join(
+        "",
+      )}</ul></details><div class="share-status" id="share-status"></div></div>`,
     false,
   );
   $("#result-primary").onclick = () =>
@@ -428,10 +533,23 @@ function showResult(
   if (win) $("#share-btn").onclick = share;
   else $("#result-tip").onclick = () => how(true);
 }
+function escapeHTML(text: string) {
+  return text.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
+        c
+      ] || c,
+  );
+}
 function share() {
   if (!lastResult) return;
   const r = lastResult;
-  const text = `I escaped the ruleset 2 office hunt on ${LEVELS[r.level - 1].name} in ${formatTime(r.time)}. ${r.medal} · ${r.score.toLocaleString()} pts · ${r.spots} sightings. ${r.daily ? "Daily " + r.seed + " · " : ""}THE GREAT OFFICE ESCAPE: 4:59 PM. Your manager is typing…`;
+  const text = [
+    "THE GREAT OFFICE ESCAPE · INCIDENT REPORT",
+    ...incidentReport(r, true),
+    `${r.medal} · ${r.score.toLocaleString()} pts${r.daily ? " · Daily " + r.seed : ""}`,
+  ].join("\n");
   if (navigator.share)
     navigator
       .share({ title: "The Great Office Escape: 4:59 PM", text })
@@ -471,7 +589,7 @@ function achievements() {
 function settings() {
   modal(
     "settings",
-    `<div class="modal-eyebrow">YOUR OFFICE. YOUR TERMS.</div><h2>SET BOUNDARIES.</h2><label class="setting-row">Music <input id="music-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.music}" aria-label="Music volume"></label><label class="setting-row">Sound effects <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.sfx}" aria-label="Sound effects volume"></label><label class="setting-row">Mute all audio <input id="mute-check" type="checkbox" ${save.settings.mute ? "checked" : ""}></label><label class="setting-row">Reduced motion <input id="motion-check" type="checkbox" ${save.settings.reducedMotion ? "checked" : ""}></label><label class="setting-row">Hit scene length <select id="hit-scene-mode" aria-label="Hit scene length"><option value="brief" ${save.settings.hitScenes === "brief" ? "selected" : ""}>Brief · ~1 second</option><option value="long" ${save.settings.hitScenes === "long" ? "selected" : ""}>Long haul · ~3–4 seconds</option></select></label><p>Each hit shows its own animated event. The office pauses; E or tap skips.</p><p>Progress is saved locally on this browser. No accounts, trackers, AI calls, or meetings required.</p><div class="modal-actions"><button id="settings-done" class="primary">DONE ↗</button></div>`,
+    `<div class="modal-eyebrow">YOUR OFFICE. YOUR TERMS.</div><h2>SET BOUNDARIES.</h2><label class="setting-row">Music <input id="music-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.music}" aria-label="Music volume"></label><label class="setting-row">Sound effects <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.sfx}" aria-label="Sound effects volume"></label><label class="setting-row">Mute all audio <input id="mute-check" type="checkbox" ${save.settings.mute ? "checked" : ""}></label><label class="setting-row">Reduced motion <input id="motion-check" type="checkbox" ${save.settings.reducedMotion ? "checked" : ""}></label><label class="setting-row">Hit scene length <select id="hit-scene-mode" aria-label="Hit scene length"><option value="brief" ${save.settings.hitScenes === "brief" ? "selected" : ""}>Brief · ~1 second</option><option value="long" ${save.settings.hitScenes === "long" ? "selected" : ""}>Long haul · ~3–4 seconds</option></select></label><label class="setting-row">Context tips <input id="tips-check" type="checkbox" ${save.settings.tips ? "checked" : ""}></label><p>Each hit shows its own animated event. The office pauses; E or tap skips.</p><p>Progress is saved locally on this browser. No accounts, trackers, AI calls, or meetings required.</p><div class="modal-actions"><button id="settings-done" class="primary">DONE ↗</button></div>`,
     true,
   );
   $("#music-volume").oninput = () => {
@@ -499,6 +617,12 @@ function settings() {
         : "brief";
     persist(save);
   };
+  $("#tips-check").onchange = () => {
+    save.settings.tips = $<HTMLInputElement>("#tips-check").checked;
+    persist(save);
+    if (!save.settings.tips && $("#toast").classList.contains("coach-tip"))
+      $("#toast").hidden = true;
+  };
   $("#settings-done").onclick = closeModal;
 }
 function applySettings() {
@@ -509,7 +633,7 @@ function applySettings() {
 function how(afterFail = false) {
   modal(
     "how",
-    `<div class="modal-eyebrow">OBJECTIVE: LEAVE. DO NOT EXPLAIN.</div><h2>THE SURVIVAL GUIDE.</h2><div class="guide-grid"><div class="guide-block"><strong>01 · GET OUT</strong><p>Follow the gold arrow. Your own badge is already in your pocket. Press E at the gold elevator doors to call the lift. Dodge the office while it arrives, then board before the 10-second door window ends. Side switches are optional sabotage, not compulsory errands. Purple WFH exits bypass the lift with a house token + 6.</p></div><div class="guide-block"><strong>02 · DON’T GET PERCEIVED</strong><p>Colored cones show vision. Walls and furniture block sight. A filling ring gives you a grace period. Break sight to lose pursuit. Sprinting is loud. Interns are fast, not omniscient.</p></div><div class="guide-block"><strong>03 · BS IS NOT HEALTHCARE</strong><p>Getting caught adds Corporate BS. At 100%, you stay late. Purple hide spots offer six seconds of cover, then need a cooldown. Coffee and pantry breaks reduce BS. After a catch, three seconds of grace let you get moving again.</p></div><div class="guide-block"><strong>04 · USE YOUR TOOLS</strong><p>SPACE is a short dodge, not an interaction. It avoids HR lunges and moving hazard sweeps, but cannot cross furniture. Coffee only lures two colleagues and will not fool a pursuer who can still see you. Calls, camouflage, calendar, VPN and WFH remain useful but brief. Abilities unlock by floor. Mouse over a button for details.</p></div><div class="guide-block"><strong>05 · HACK HR’S FUN FRIDAY</strong><p>Find the pink HR Fun Activity booth on floors 2, 4 and 5. Press E and clap in the mint timing zone. Three of five hits reduce BS by 25, refill one coffee and distract HR for 12 seconds. Practice from CLAP PRACTICE in the main menu.</p></div><div class="guide-block"><strong>06 · STEAL THE OFFICE</strong><p>Hold E / ACT beside TVs, keyboards, plants, trophies, laptops or coffee machines. Snacks only need a tap and give recovery. Bulky equipment slows you and attracts attention. Your bag points are banked only by escaping.</p></div><div class="guide-block"><strong>07 · WATCH MEETING DOORS</strong><p>Amber doorway lights warn that a meeting is ending. Colleagues physically walk out, can spot you and alert the manager, then return. Use cover, calls, coffee or a dodge.</p></div></div><p><kbd>WASD</kbd> / arrows: move · <kbd>SHIFT</kbd> sprint · <kbd>SPACE</kbd> dodge · <kbd>E</kbd> use / hold to steal · <kbd>1–6</kbd> abilities · <kbd>ESC</kbd> pause · <kbd>M</kbd> mute. Touch: drag joystick, hold RUN, tap DASH to evade, ACT to use / hold to steal. Landscape gives a wider view.</p><details><summary style="font-size:10px;color:#a9f4ce;cursor:pointer">KNOW YOUR CORPORATE THREATS ↓</summary>${Object.values(
+    `<div class="modal-eyebrow">OBJECTIVE: LEAVE. DO NOT EXPLAIN.</div><h2>THE SURVIVAL GUIDE.</h2><div class="guide-grid"><div class="guide-block"><strong>01 · GET OUT</strong><p>Follow the gold arrow. Your own badge is already in your pocket. Press E at the gold elevator doors to call the lift. Dodge the office while it arrives, then board before the 10-second door window ends. Side switches are optional sabotage, not compulsory errands. A purple house token automatically opens the WFH exit—no extra ability activation. The lift still works too.</p></div><div class="guide-block"><strong>02 · DON’T GET PERCEIVED</strong><p>Colored cones show vision. Walls and furniture block sight. All vision cones use the same danger colour. Outlined areas warn; filled areas are active. A filling ring gives you a grace period. Break sight to lose pursuit. Sprinting is loud. Interns are fast, not omniscient.</p></div><div class="guide-block"><strong>03 · BS IS NOT HEALTHCARE</strong><p>Getting caught adds Corporate BS. At 100%, you stay late. House-shaped hiding markers offer six seconds of cover, then need a cooldown. Coffee and pantry breaks reduce BS. After a catch, three seconds of grace let you get moving again.</p></div><div class="guide-block"><strong>04 · USE YOUR TOOLS</strong><p>SPACE is a short dodge, not an interaction. It avoids HR lunges and moving hazard sweeps, but cannot cross furniture. Coffee only lures two colleagues and will not fool a pursuer who can still see you. Coffee and Fake Call are your primary optional tools. More Tools pauses the office and offers Look Busy (stay still), Meeting Shield and Office Freeze. Shortcuts 3–5 still work. A WFH token opens the alternate exit automatically.</p></div><div class="guide-block"><strong>05 · HACK HR’S FUN FRIDAY</strong><p>Find the pink HR Fun Activity booth on floors 2, 4 and 5. Press E and clap in the mint timing zone. Three of five hits reduce BS by 25, refill one coffee and distract HR for 12 seconds. Practice from CLAP PRACTICE in the main menu.</p></div><div class="guide-block"><strong>06 · STEAL THE OFFICE</strong><p>Hold E / ACT beside TVs, keyboards, plants, trophies, laptops or coffee machines. Snacks only need a tap and give recovery. Bulky equipment slows you and attracts attention. Your bag points are banked only by escaping.</p></div><div class="guide-block"><strong>07 · WATCH MEETING DOORS</strong><p>Amber doorway lights warn that a meeting is ending. Colleagues physically walk out, can spot you and alert the manager, then return. Use cover, calls, coffee or a dodge.</p></div></div><p><kbd>WASD</kbd> / arrows: move · <kbd>SHIFT</kbd> sprint · <kbd>SPACE</kbd> dodge · <kbd>E</kbd> use / hold to steal · <kbd>1/2</kbd> primary tools · <kbd>3–5</kbd> optional extras · <kbd>ESC</kbd> pause · <kbd>M</kbd> mute. Touch: drag joystick, hold RUN, tap DASH to evade, ACT to use / hold to steal. Landscape gives a wider view.</p><details><summary style="font-size:10px;color:#a9f4ce;cursor:pointer">KNOW YOUR CORPORATE THREATS ↓</summary>${Object.values(
       ENEMIES,
     )
       .map(

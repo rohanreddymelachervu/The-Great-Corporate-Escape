@@ -95,6 +95,14 @@ export interface EnemyDef {
   quotes: string[];
   weakness: string;
 }
+export interface RunStory {
+  coffees: number;
+  staffSpots: number;
+  conversations: number;
+  chatStillGoing: boolean;
+  lootNames: string[];
+  exit: "lift" | "wfh";
+}
 export interface Result {
   level: number;
   time: number;
@@ -110,6 +118,7 @@ export interface Result {
   ruleset?: number;
   lootValue?: number;
   stolen?: number;
+  story?: RunStory;
   daily: boolean;
   seed: string;
 }
@@ -124,6 +133,7 @@ export interface SaveData {
     mute: boolean;
     reducedMotion: boolean;
     hitScenes: "brief" | "long";
+    tips: boolean;
   };
   dailyBests: Record<string, number>;
 }

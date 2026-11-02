@@ -9,6 +9,8 @@ import {
   TheftAction,
 } from "./loot";
 import { MeetingTraffic } from "./traffic";
+import { OfficeSocial } from "./social";
+import { drawOfficeChat } from "./render-social";
 import { drawMeetingTraffic } from "./render-traffic";
 import { OfficeAudio } from "../audio/audio";
 import { LEVELS } from "./levels";
@@ -58,6 +60,11 @@ export class OfficeScene extends Phaser.Scene {
   random: () => number = Math.random;
   director!: EscapeDirector;
   traffic!: MeetingTraffic;
+  social = new OfficeSocial();
+  socialArt!: Phaser.GameObjects.Graphics;
+  socialLabels = new Map<string, Phaser.GameObjects.Text>();
+  conversations = 0;
+  staffSpots = 0;
   trafficArt!: Phaser.GameObjects.Graphics;
   staffSprites = new Map<string, Phaser.GameObjects.Image>();
   doorLabels = new Map<string, Phaser.GameObjects.Text>();
@@ -152,6 +159,10 @@ export class OfficeScene extends Phaser.Scene {
     this.enemies = [];
     this.director = new EscapeDirector(this.level, this.options.seed);
     this.traffic = new MeetingTraffic(this.level, this.options.seed);
+    this.social = new OfficeSocial();
+    this.socialLabels = new Map();
+    this.conversations = 0;
+    this.staffSpots = 0;
     this.staffSprites = new Map();
     this.doorLabels = new Map();
     this.bag = new LootBag();
@@ -232,6 +243,7 @@ export class OfficeScene extends Phaser.Scene {
     this.fx = this.add.graphics().setDepth(51);
     this.incidentArt = this.add.graphics().setDepth(24);
     this.trafficArt = this.add.graphics().setDepth(16);
+    this.socialArt = this.add.graphics().setDepth(53);
     this.drawExit(this.level.exit, false);
     if (this.level.altExit) this.drawExit(this.level.altExit, true);
     for (const item of this.level.items) this.drawItem(item);
@@ -332,11 +344,6 @@ export class OfficeScene extends Phaser.Scene {
     if (!this.preview) {
       this.cameras.main.fadeIn(this.reducedMotion ? 0 : 450, 16, 22, 37);
       this.audio.music(this.level.id === 5 ? "final" : "game");
-      emit("toast", {
-        title: "4:59 PM · " + this.level.name,
-        text: this.level.brief,
-        duration: 6,
-      });
     }
     this.updateHud();
   }
@@ -407,7 +414,7 @@ export class OfficeScene extends Phaser.Scene {
       const def = LOOT[item.kind],
         glow = this.add
           .graphics()
-          .lineStyle(1, item.kind === "tv" ? 0xffd785 : 0xa9d9ef, 0.65)
+          .lineStyle(1, 0xa9f4ce, 0.65)
           .strokeCircle(0, 1, item.kind === "tv" ? 25 : 19);
       const sprite = this.add
         .image(0, 0, "loot-" + item.kind)
@@ -420,7 +427,8 @@ export class OfficeScene extends Phaser.Scene {
           backgroundColor: "#172238dd",
           padding: { x: 4, y: 2 },
         })
-        .setOrigin(0.5, 0);
+        .setOrigin(0.5, 0)
+        .setVisible(false);
       const object = this.add
         .container(item.x, item.y, [glow, sprite, label])
         .setDepth(22);
@@ -602,6 +610,7 @@ export class OfficeScene extends Phaser.Scene {
       }),
     );
     if (this.cinematic) return;
+    this.updateSocial(dt);
     if (this.hidden) this.bs = Math.max(0, this.bs - dt * 1.4);
     if (yapping) {
       this.internTime += dt;
@@ -638,7 +647,7 @@ export class OfficeScene extends Phaser.Scene {
             this.lastThreatAt = this.elapsed + 3;
             emit("toast", {
               title: "HR IS LINING UP A PHOTO",
-              text: "Pink aim line is locked. SPACE dodge sideways when HR charges!",
+              text: "The aim line is locked. SPACE dodge sideways when HR charges!",
               duration: 3,
             });
           },
@@ -661,7 +670,7 @@ export class OfficeScene extends Phaser.Scene {
           catch: (e) => this.caught(e),
           broadcast: (p) => {
             this.enemies
-              .filter((o) => o !== e && dist(o, e) < 320)
+              .filter((o) => o !== e && dist(o, e) < 320 && !this.chatBusy(o))
               .forEach((o) => o.investigate(p, 7));
             emit("toast", {
               title: "LOCATION LEAKED",
@@ -697,9 +706,10 @@ export class OfficeScene extends Phaser.Scene {
       }
       if (event.type === "spot") {
         this.spots++;
+        this.staffSpots++;
         this.audio.sfx("alert");
         this.enemies
-          .filter((e) => dist(e, event.point) < 440)
+          .filter((e) => dist(e, event.point) < 440 && !this.chatBusy(e))
           .forEach((e) => e.investigate(event.point, 6));
         emit("toast", { title: event.title, text: event.text, duration: 3 });
       }
@@ -712,6 +722,7 @@ export class OfficeScene extends Phaser.Scene {
       .slice(0, 2);
     for (const enemy of this.enemies) {
       enemy.bubble.setVisible(false);
+      enemy.sprite.setAngle(0).setScale(1.35);
       enemy.label.setVisible(
         (readableEnemies.includes(enemy) || enemy.kind === "hr") &&
           dist(enemy, this.pos) < 330,
@@ -728,8 +739,16 @@ export class OfficeScene extends Phaser.Scene {
         if (item.kind === "coffee") {
           this.coffee = Math.min(5, this.coffee + 1);
           this.bs = Math.max(0, this.bs - 8);
-        } else if (item.kind === "wfh") this.wfh++;
-        else {
+        } else if (item.kind === "wfh") {
+          this.wfhActive = true;
+          this.wfh = 0;
+          this.active.wfh = 999;
+          emit("toast", {
+            title: "WFH EXIT OPEN",
+            text: "The purple house token opened your alternate exit automatically. Follow the rerouted gold arrow, or keep using the lift.",
+            duration: 5,
+          });
+        } else {
           emit("toast", {
             title: "LOST ID RECOVERED · OPTIONAL",
             text: "Someone else escaped first. You already have your own ID; keep heading to the lift.",
@@ -789,14 +808,11 @@ export class OfficeScene extends Phaser.Scene {
       .setPosition(this.pos.x + 17, this.pos.y - 8)
       .setDepth(46 + this.pos.y / 1000);
     // Context belongs in the information rail, never over sprites or cones.
-    const lootWins =
-      this.lootTarget &&
-      (!this.target ||
-        dist(this.pos, this.lootTarget) < dist(this.pos, this.target));
+    const focusLoot = this.focusedLoot;
     this.hintText = this.theft.id
       ? `STEALING ${LOOT[this.level.items.find((i) => i.id === this.theft.id)!.kind as keyof typeof LOOT].name.toUpperCase()} · ${Math.round(this.theft.progress * 100)}% · hold E / ACT`
-      : lootWins && this.lootTarget
-        ? `${LOOT[this.lootTarget.kind as keyof typeof LOOT].hold ? "HOLD" : "TAP"} E · ${LOOT[this.lootTarget.kind as keyof typeof LOOT].name} +${LOOT[this.lootTarget.kind as keyof typeof LOOT].points} bag points`
+      : focusLoot
+        ? `${LOOT[focusLoot.kind as keyof typeof LOOT].hold ? "HOLD" : "TAP"} E · ${LOOT[focusLoot.kind as keyof typeof LOOT].name} +${LOOT[focusLoot.kind as keyof typeof LOOT].points} bag points`
         : this.hidden
           ? `HIDDEN · ${Math.ceil(this.hideLeft)}s breath left. E to leave.`
           : atExit
@@ -808,7 +824,7 @@ export class OfficeScene extends Phaser.Scene {
             : atAlt
               ? this.wfhActive
                 ? "Purple exit approved. Walk in."
-                : "6 · Emergency WFH needs the purple house token."
+                : "Find a purple house token to open this exit automatically."
               : this.target
                 ? this.used.has(this.target.id)
                   ? "✓ " + this.target.label
@@ -822,6 +838,19 @@ export class OfficeScene extends Phaser.Scene {
       this.children.getByName("spawnLabel") as Phaser.GameObjects.Text
     )?.setVisible(this.elapsed < 2.5);
     this.drawEffects();
+    drawOfficeChat(
+      this,
+      this.socialArt,
+      this.social.active,
+      this.enemies.map((e, i) => ({
+        id: String(i),
+        x: e.x,
+        y: e.y,
+        sprite: e.sprite,
+      })),
+      this.socialLabels,
+      this.reducedMotion,
+    );
     drawMeetingTraffic(
       this,
       this.trafficArt,
@@ -849,6 +878,68 @@ export class OfficeScene extends Phaser.Scene {
       this.updateHud();
       this.hudAt = this.elapsed + 0.075;
     }
+  }
+  get focusedLoot(): Item | null {
+    if (this.hidden || dist(this.pos, center(this.level.exit)) < 70)
+      return null;
+    const loot = this.lootTarget;
+    return loot &&
+      (!this.target || dist(this.pos, loot) < dist(this.pos, this.target))
+      ? loot
+      : null;
+  }
+  chatBusy(enemy: OfficeEnemy) {
+    return this.social.isBusy(String(this.enemies.indexOf(enemy)));
+  }
+  updateSocial(dt: number) {
+    const events = this.social.update(dt, {
+      actors: this.enemies.map((e, i) => ({
+        id: String(i),
+        kind: e.kind,
+        x: e.x,
+        y: e.y,
+        state: e.state,
+        awareness: e.awareness,
+        catchCooldown: e.catchCooldown,
+      })),
+      obstacles: this.obstacles,
+      nav: this.nav,
+      frozen: !!this.active.vpn || this.cinematic,
+    });
+    for (const event of events) {
+      const chat = event.chat,
+        intern = this.enemies[Number(chat.internId)],
+        founder = this.enemies[Number(chat.founderId)];
+      if (event.type === "start") {
+        intern.investigate(chat.internSpot, 15, true);
+        founder.investigate(chat.founderSpot, 15, true);
+        if (Math.min(dist(intern, this.pos), dist(founder, this.pos)) < 450)
+          emit("toast", {
+            title: "THEY FOUND EACH OTHER",
+            text: "The intern is pitching the founder. Both are occupied—your chance to slip past.",
+            duration: 4,
+          });
+      }
+      if (event.type === "line") {
+        if (chat.line === 0) this.conversations++;
+        const speaker = event.speaker === "intern" ? intern : founder;
+        speaker?.say(event.text || "", this.elapsed, 1.8);
+      }
+      if (event.type === "end")
+        for (const actor of [intern, founder])
+          if (actor && actor.state === "distracted") {
+            actor.state = "patrol";
+            actor.stateTime = 0;
+            actor.target = null;
+            actor.path = [];
+            actor.repath = 0;
+            actor.idle = 0.4;
+          }
+    }
+    if (this.social.active)
+      this.director.incidents = this.director.incidents.filter(
+        (h) => h.kind !== "yap" && h.kind !== "allhands",
+      );
   }
   dash() {
     if (
@@ -909,6 +1000,13 @@ export class OfficeScene extends Phaser.Scene {
   }
   applyDirectorEvents(events: DirectorEvent[]) {
     for (const event of events) {
+      if (
+        this.social.active &&
+        (event.kind === "yap" ||
+          event.kind === "allhands" ||
+          (event.type === "rally" && event.who === "founder"))
+      )
+        continue;
       if (event.type === "hit") {
         const kind = event.kind || "meeting";
         if (
@@ -926,12 +1024,16 @@ export class OfficeScene extends Phaser.Scene {
         const chosen = this.enemies.filter(
           (e) => !event.who || e.kind === event.who,
         );
-        chosen.forEach((e) => e.investigate(point, 6));
+        chosen
+          .filter((e) => !this.chatBusy(e))
+          .forEach((e) => e.investigate(point, 6));
         if (event.kind === "allhands" || event.who === "founder") {
           this.eventType = "hands";
           this.eventUntil = this.elapsed + 6;
           this.audio.sfx("founder");
-          this.enemies.forEach((e) => e.investigate(point, 5));
+          this.enemies
+            .filter((e) => !this.chatBusy(e))
+            .forEach((e) => e.investigate(point, 5));
         }
       }
       if (event.type === "arrived") {
@@ -985,7 +1087,7 @@ export class OfficeScene extends Phaser.Scene {
         });
       return;
     }
-    const loot = this.lootTarget;
+    const loot = this.focusedLoot;
     if (
       loot &&
       (!this.target || dist(this.pos, loot) < dist(this.pos, this.target))
@@ -1064,7 +1166,9 @@ export class OfficeScene extends Phaser.Scene {
         5: "pm",
       };
       this.enemies
-        .filter((e) => e.kind === targets[this.level.id as 1])
+        .filter(
+          (e) => e.kind === targets[this.level.id as 1] && !this.chatBusy(e),
+        )
         .forEach((e) => e.investigate(i, 8, true));
       const cancel = {
         1: "meeting",
@@ -1120,7 +1224,7 @@ export class OfficeScene extends Phaser.Scene {
       this.distractions++;
       this.bs = Math.max(0, this.bs - 5);
       this.enemies
-        .filter((e) => e.kind === i.target)
+        .filter((e) => e.kind === i.target && !this.chatBusy(e))
         .forEach((e) => {
           e.investigate(i, 10, true);
           e.say(ENEMIES[e.kind].weakness + "? On my way.", this.elapsed);
@@ -1197,7 +1301,7 @@ export class OfficeScene extends Phaser.Scene {
       }
       let fooled = 0;
       this.enemies
-        .filter((e) => dist(e, target) < 260)
+        .filter((e) => dist(e, target) < 260 && !this.chatBusy(e))
         .sort((a, b) => dist(a, target) - dist(b, target))
         .slice(0, 2)
         .forEach((e) => {
@@ -1227,23 +1331,16 @@ export class OfficeScene extends Phaser.Scene {
         .setName("spill-" + this.elapsed);
       this.audio.sfx("coffee");
     } else if (a === "wfh") {
-      if (!this.wfh || this.wfhActive) {
-        emit("toast", {
-          title: "WFH REQUIRES AN APPROVAL TOKEN",
-          text: "Find the purple house pickup first. Then use the purple exit.",
-          duration: 3,
-        });
-        return;
-      }
-      this.wfh--;
-      this.wfhActive = true;
-      this.active.wfh = 999;
       emit("toast", {
-        title: "WORK FROM ANYWHERE (ELSE)",
-        text: "Purple exit approved. It bypasses the lift wait — go!",
-        duration: 4,
+        title: this.wfhActive
+          ? "WFH IS ALREADY APPROVED"
+          : "WFH NEEDS A HOUSE TOKEN",
+        text: this.wfhActive
+          ? "The purple exit is open. Follow the gold arrow; the lift still works too."
+          : "Pick up the purple house token. It opens the alternate exit automatically—no extra button.",
+        duration: 3,
       });
-      this.audio.sfx("ability");
+      return;
     } else {
       if (a === "slack" && this.bag.weight >= 3) {
         emit("toast", {
@@ -1364,7 +1461,7 @@ export class OfficeScene extends Phaser.Scene {
     }
     if (reward.noise > 0) {
       this.enemies
-        .filter((e) => dist(e, item) < reward.noise)
+        .filter((e) => dist(e, item) < reward.noise && !this.chatBusy(e))
         .slice(0, 3)
         .forEach((e) => e.investigate(item, 6));
       this.lastThreat =
@@ -1420,10 +1517,7 @@ export class OfficeScene extends Phaser.Scene {
             ),
           );
         }
-        g.fillStyle(
-          e.state === "chase" ? 0xff6b73 : d.color,
-          e.awareness > 0.1 ? 0.17 : 0.075,
-        );
+        g.fillStyle(0xff7e8c, e.awareness > 0.1 ? 0.17 : 0.075);
         g.fillPoints(pts, true);
         if (e.awareness > 0.03) {
           g.lineStyle(3, e.awareness > 0.65 ? 0xff7379 : 0xffd580, 0.9);
@@ -1443,16 +1537,7 @@ export class OfficeScene extends Phaser.Scene {
     m.clear();
     for (const i of this.level.interactions) {
       const used = this.used.has(i.id),
-        color =
-          i.type === "hide"
-            ? 0xc0abf3
-            : i.type === "switch"
-              ? 0x9cf1c6
-              : i.type === "coffee"
-                ? 0xf2c795
-                : i.type === "fun"
-                  ? 0xf5a9d0
-                  : 0x82cfee;
+        color = 0xa9f4ce;
       m.lineStyle(
         used ? 1 : 2,
         color,
@@ -1567,12 +1652,16 @@ export class OfficeScene extends Phaser.Scene {
           y + Math.sin(a - 2.5) * 6,
         );
     }
-    for (const [id, obj] of this.itemObjects)
-      if (!this.collected.has(id))
-        obj.setY(
-          (this.level.items.find((i) => i.id === id)?.y || 0) +
-            Math.sin(this.elapsed * 3 + id.length) * 2,
-        );
+    for (const [id, obj] of this.itemObjects) {
+      if (this.collected.has(id)) continue;
+      const item = this.level.items.find((i) => i.id === id)!;
+      obj.setY(item.y + Math.sin(this.elapsed * 3 + id.length) * 2);
+      if (isStealable(item.kind)) {
+        const focus = id === this.focusedLoot?.id || id === this.theft.id;
+        (obj.list[2] as Phaser.GameObjects.Text).setVisible(focus);
+        (obj.list[0] as Phaser.GameObjects.Graphics).setAlpha(focus ? 1 : 0.35);
+      }
+    }
   }
   updateHud() {
     const phase = this.director.phase;
@@ -1624,6 +1713,14 @@ export class OfficeScene extends Phaser.Scene {
       dashCooldown: this.dashCooldown,
       hideLeft: this.hideLeft,
       target: this.target?.label || "",
+      lootTarget: this.focusedLoot?.id,
+      activeDanger: this.director.incidents.some(
+        (h) =>
+          h.age >= h.warn &&
+          h.age < h.life &&
+          !h.hit &&
+          dist(h, this.pos) < 180,
+      ),
       suspicion: Math.max(
         0,
         ...this.enemies.map((e) => e.awareness),
@@ -1634,7 +1731,12 @@ export class OfficeScene extends Phaser.Scene {
       context: this.hintText,
       dialogue:
         this.enemies
-          .filter((e) => this.elapsed < e.quoteUntil && dist(e, this.pos) < 260)
+          .filter(
+            (e) =>
+              this.elapsed < e.quoteUntil &&
+              dist(e, this.pos) < 260 &&
+              !this.chatBusy(e),
+          )
           .sort((a, b) => dist(a, this.pos) - dist(b, this.pos))
           .map((e) => ({
             speaker: ENEMIES[e.kind].name,
@@ -1679,6 +1781,16 @@ export class OfficeScene extends Phaser.Scene {
       medal: medal(score, this.spots, this.hits, this.elapsed, this.level.par),
       daily: this.options.daily,
       seed: this.options.seed,
+      story: {
+        coffees: this.coffeeUsed,
+        staffSpots: this.staffSpots,
+        conversations: this.conversations,
+        chatStillGoing: this.social.active?.phase === "talking",
+        lootNames: [...new Set(this.bag.taken.values())].map(
+          (k) => LOOT[k].name,
+        ),
+        exit: alt ? "wfh" : "lift",
+      },
     };
     const earned: string[] = [];
     if (this.spots === 0) earned.push("ghost");
@@ -1762,7 +1874,17 @@ export class OfficeScene extends Phaser.Scene {
       lootCount: this.bag.count,
       lootWeight: this.bag.weight,
       theft: { id: this.theft.id, progress: this.theft.progress },
-      lootTarget: this.lootTarget?.id,
+      lootTarget: this.focusedLoot?.id,
+      labelledLoot: [...this.itemObjects]
+        .filter(([id, obj]) => {
+          const item = this.level.items.find((i) => i.id === id);
+          return (
+            item &&
+            isStealable(item.kind) &&
+            (obj.list[2] as Phaser.GameObjects.Text).visible
+          );
+        })
+        .map(([id]) => id),
       items: this.level.items
         .filter((i) => !this.collected.has(i.id))
         .map((i) => ({ ...i })),
@@ -1807,10 +1929,15 @@ export class OfficeScene extends Phaser.Scene {
         y: e.y,
         state: e.state,
         angle: e.angle,
+        poseAngle: e.sprite.angle,
         awareness: e.awareness,
         specialPhase: e.specialPhase,
         aim: e.aim,
       })),
+      social: this.social.active ? { ...this.social.active } : null,
+      conversations: this.conversations,
+      chatCaption:
+        [...this.socialLabels.values()].find((t) => t.visible)?.text || "",
       objectives: this.level.required,
       obstacles: this.obstacles.map((o) => ({ ...o })),
     };

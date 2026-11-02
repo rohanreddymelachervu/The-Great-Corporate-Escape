@@ -11,6 +11,7 @@ export const freshSave = (): SaveData => ({
     mute: false,
     reducedMotion: false,
     hitScenes: "brief",
+    tips: true,
   },
   dailyBests: {},
 });
