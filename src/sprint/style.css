@@ -834,3 +834,24 @@ body.racing .wordmark small {
 body.race-reduced .race-jargon-wall span {
   animation: none !important;
 }
+
+/* Persistent incoming-call screen: both explicit choices remain reachable. */
+#race-modal.race-punishment {
+  overflow: auto;
+}
+.race-punishment-panel {
+  min-height: 100%;
+  height: auto;
+  padding: 20px 10px;
+}
+.race-failure-actions {
+  justify-content: center;
+}
+.race-failure-actions .race-primary {
+  margin: 0;
+}
+.race-failure-actions .race-secondary {
+  background: #78283a;
+  color: #fff0df;
+  border-color: #ffd3bf;
+}

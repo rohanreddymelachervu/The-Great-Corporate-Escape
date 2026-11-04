@@ -114,6 +114,7 @@ export function setupSprintModes(o: {
     screen = "";
   }
   function start(next: RaceOptions) {
+    audio.stopCallRingtone();
     enter();
     options = {
       ...next,
@@ -142,7 +143,13 @@ export function setupSprintModes(o: {
   }
   function retry() {
     if (!active || !scene.run) return;
-    if (scene.run.phase === "failed" && scene.run.failureAge < 0.15) return;
+    if (
+      options.mode === "buzzword" &&
+      scene.run.phase === "failed" &&
+      scene.run.failureAge < 0.15
+    )
+      return;
+    audio.stopCallRingtone();
     attempt++;
     paused = false;
     external = false;
@@ -156,6 +163,7 @@ export function setupSprintModes(o: {
     $("#game").focus();
   }
   function stop() {
+    audio.stopCallRingtone();
     if (noticeTimer) clearTimeout(noticeTimer);
     active = false;
     paused = false;
@@ -198,6 +206,23 @@ export function setupSprintModes(o: {
       open(options.mode);
       return;
     }
+    if (scene.run?.phase === "failed" && options.mode === "sprint") {
+      paused = !paused;
+      scene.resetInput();
+      if (paused) {
+        scene.scene.pause();
+        audio.suspend();
+      } else {
+        scene.scene.resume();
+        audio.resume();
+      }
+      const status = $("#race-failure-status");
+      if (status)
+        status.textContent = paused
+          ? "CALL PAUSED. Choose Restart Level or Main Menu."
+          : "No automatic retry. Your weekend is waiting for your decision.";
+      return;
+    }
     if (paused) {
       paused = false;
       scene.scene.resume();
@@ -222,6 +247,7 @@ export function setupSprintModes(o: {
     $("#race-home").onclick = back;
   }
   function open(mode: RaceMode) {
+    audio.stopCallRingtone();
     enter();
     options = { mode, courseId: 1 };
     paused = false;
@@ -253,7 +279,7 @@ export function setupSprintModes(o: {
     } else {
       screen = "courses";
       panel(
-        `<div class="race-eyebrow">PURE TIME. ZERO SIDE QUESTS.</div><h2>CLOCK OUT<br>SPRINT.</h2><p>Reach the exit. Move, sprint, dodge. No stolen items, abilities, BS meter or lift wait. A catch means a quick retry of the same pattern.</p><div class="race-course-grid">${SPRINT_COURSES.map(
+        `<div class="race-eyebrow">PURE TIME. ZERO SIDE QUESTS.</div><h2>CLOCK OUT<br>SPRINT.</h2><p>Reach the exit. Move, sprint, dodge. No stolen items, abilities, BS meter or lift wait. A catch opens an incoming-call screen. Choose Restart Level or Main Menu; there is no automatic retry.</p><div class="race-course-grid">${SPRINT_COURSES.map(
           (c) => {
             const b = raceBest("sprint", c.id);
             return `<button data-race-course="${c.id}" class="race-course-card"><b>${String(c.id).padStart(2, "0")}</b><span><strong>${escape(c.name)}</strong><small>${escape(c.subtitle)}</small></span><em>${b ? formatRaceTime(b.time) : "UNRUN"}<small>GOLD ${c.gold.toFixed(1)}s</small></em></button>`;
@@ -282,10 +308,16 @@ export function setupSprintModes(o: {
         `<span style="--n:${i}">${JARGON[(i + attempt * 3) % JARGON.length]}</span>`,
     ).join("");
     panel(
-      `<div class="race-jargon-wall" aria-hidden="true">${wall}</div><div class="race-failure-copy"><div class="race-eyebrow">UNSCHEDULED CALL · WEEKEND_REQUEST_DENIED</div><h2>LET’S QUICKLY<br>ALIGN ON THIS.</h2><p>${escape(reason)}</p><p>${FAILURE_LINES[attempt % FAILURE_LINES.length]}</p><button id="race-retry-now" class="race-primary">RETRY · R / SPACE ↻</button><small id="race-auto-retry">Automatic quick retry. Same course. Same pattern.</small></div>`,
+      `<div class="race-jargon-wall" aria-hidden="true">${wall}</div><div class="race-failure-copy"><div class="race-eyebrow">UNSCHEDULED CALL · WEEKEND_REQUEST_DENIED</div><h2>LET’S QUICKLY<br>ALIGN ON THIS.</h2><p>${escape(reason)}</p><p>${FAILURE_LINES[attempt % FAILURE_LINES.length]}</p>${options.mode === "sprint" ? `<div class="race-actions race-failure-actions"><button id="race-retry-now" class="race-primary">RESTART LEVEL ↻</button><button id="race-failure-home" class="race-secondary">MAIN MENU</button></div><small id="race-failure-status">No automatic retry. Your weekend is waiting for your decision.</small>` : `<button id="race-retry-now" class="race-primary">RETRY · R / SPACE ↻</button><small id="race-auto-retry">Automatic quick retry. Same course. Same pattern.</small>`}</div>`,
       "race-punishment",
     );
     $("#race-retry-now").onclick = retry;
+    if (options.mode === "sprint") {
+      $("#race-failure-home").onclick = back;
+      const dialog = overlay.querySelector<HTMLElement>(".race-panel")!;
+      dialog.tabIndex = -1;
+      requestAnimationFrame(() => dialog.focus());
+    }
   }
   function showWin(r: RaceResult) {
     const rec = recordRace(r);
@@ -370,7 +402,11 @@ export function setupSprintModes(o: {
       overlay.innerHTML = `<div class="race-ready"><b>${n}</b><span>MOVE · SPRINT · DODGE</span></div>`;
       overlay.hidden = false;
     } else if (h.phase === "running" && screen === "countdown") hidePanel();
-    if (h.phase === "failed" && screen === "failure")
+    if (
+      h.phase === "failed" &&
+      screen === "failure" &&
+      options.mode === "buzzword"
+    )
       $("#race-auto-retry").textContent =
         "RETRYING IN " +
         Math.max(0, 1.1 - h.failureAge).toFixed(1) +
@@ -384,7 +420,7 @@ export function setupSprintModes(o: {
     if (active) showWin(e.detail);
   }) as EventListener);
   window.addEventListener("race:auto-retry", () => {
-    if (active && !paused && !external) retry();
+    if (active && options.mode === "buzzword" && !paused && !external) retry();
   });
   window.addEventListener("race:notice", ((e: CustomEvent<string>) => {
     if (!active) return;
@@ -398,9 +434,11 @@ export function setupSprintModes(o: {
   document.addEventListener("keydown", (e) => {
     if (
       !active ||
-      !scene.scene.isActive() ||
+      (!scene.scene.isActive() &&
+        !(scene.run?.phase === "failed" && options.mode === "sprint")) ||
       o.externalModal() ||
-      paused ||
+      (paused &&
+        !(scene.run?.phase === "failed" && options.mode === "sprint")) ||
       external ||
       e.repeat ||
       ["INPUT", "SELECT", "TEXTAREA"].includes(
@@ -418,7 +456,9 @@ export function setupSprintModes(o: {
         scene.queueDash();
       } else if (scene.run.phase === "failed") {
         e.preventDefault();
-        retry();
+        if (options.mode === "buzzword") retry();
+        else if ((e.target as HTMLElement)?.closest("#race-modal button"))
+          (e.target as HTMLButtonElement).click();
       }
     }
   });

@@ -1,0 +1,8 @@
+USER-SUPPLIED THIRD-PARTY AUDIO
+
+Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3
+Supplied by the project owner on 4 November 2026 specifically for the Sprint failure-screen ringtone.
+Original bytes: 418795. SHA-256: 03f47b85c57c3401bbda6ea0f96c8c194d56f4044ed42d794bbb26464aad1374.
+Embedded byte-for-byte in src/audio/teams-ringtone.ts. No remote download occurs during play.
+This is third-party user-provided audio, not an original composition by this project, and is not covered by the application's MIT license.
+Microsoft Teams names and associated audio belong to their respective rights holders. No official endorsement or redistribution license is asserted or independently verified.

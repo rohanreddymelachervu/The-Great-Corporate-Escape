@@ -61,17 +61,28 @@ for (const viewport of [
   if (!(await p.locator(".race-punishment").isVisible()))
     throw Error("No red corporate punishment");
   const time = await p.evaluate(() => window.__sprint.snapshot().elapsed);
-  await p.waitForTimeout(100);
+  await p.waitForFunction(() => window.__sprint.audio().playing);
+  const ringtone = await p.evaluate(() => window.__sprint.audio());
+  if (ringtone.duration < 25 || !ringtone.loop)
+    throw Error("Uploaded MP3 not looping");
+  await p.waitForTimeout(viewport.width === 1280 ? 28000 : 2200);
+  if (!(await p.evaluate(() => window.__sprint.audio().playing)))
+    throw Error("Ringtone stopped without a choice");
   if ((await p.evaluate(() => window.__sprint.snapshot().elapsed)) !== time)
     throw Error("Failed race clock advanced");
   await p.screenshot({
     path: `test-results/race-offline-loss-${viewport.width}.png`,
   });
+  if ((await p.evaluate(() => window.__sprint.snapshot().phase)) !== "failed")
+    throw Error("Sprint failure screen dismissed itself");
+  await p.locator("#race-retry-now").click();
   await p.waitForFunction(
     () => window.__sprint.snapshot().phase === "countdown",
     {},
     { timeout: 2500 },
   );
+  if (await p.evaluate(() => window.__sprint.audio().requested))
+    throw Error("Ringtone leaked into restart");
   await p.locator("#home-link").click();
   await p.locator("#buzzword-mode-btn").click();
   await p.locator("#buzzword-start").click();
@@ -99,7 +110,10 @@ for (const viewport of [
     dodgeDistance: after - before,
     redLoss: true,
     clockFrozen: true,
-    autoRetry: true,
+    persistentFailure: true,
+    uploadedRingtone: true,
+    waitedThroughFullLoop: viewport.width === 1280,
+    explicitRestart: true,
     wordBadges: s.letters.length,
     canvasMatchesViewport: bounds.match,
     pageOverflow: bounds.overflow,

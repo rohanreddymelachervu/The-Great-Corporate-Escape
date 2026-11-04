@@ -1,0 +1,117 @@
+
+> the-great-office-escape@3.0.1 test:races
+> node scripts/race-playtest.mjs
+
+ESCAPED {
+  mode: 'sprint',
+  courseId: 1,
+  attempt: 1,
+  time: 9.910999999999987,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C01',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 2,
+  attempt: 1,
+  time: 8.709900000000358,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C02',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 3,
+  attempt: 1,
+  time: 14.869199999999168,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C03',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 4,
+  attempt: 1,
+  time: 7.835599999999622,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C04',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 5,
+  attempt: 1,
+  time: 8.594900000000358,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C05',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 6,
+  attempt: 1,
+  time: 16.621599999999564,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C06',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 7,
+  attempt: 1,
+  time: 8.72269999999925,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C07',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 8,
+  attempt: 1,
+  time: 11.373599999999627,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C08',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 9,
+  attempt: 1,
+  time: 16.80319999999919,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C09',
+  realInputsOnly: true
+}
+CAUGHT sprint 10 1 staff booked a surprise catch-up. Escape cancelled. { x: 1310.2969177031898, y: 470.3803701448767 }
+CAUGHT sprint 10 2 HR accepted your weekend as a team-building opportunity. { x: 966.6161101786563, y: 282.0297815663925 }
+CAUGHT sprint 10 3 HR accepted your weekend as a team-building opportunity. { x: 970.6186228047096, y: 277.3323223302566 }
+ESCAPED {
+  mode: 'sprint',
+  courseId: 10,
+  attempt: 4,
+  time: 12.814499999999956,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C10',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'buzzword',
+  courseId: 2,
+  attempt: 1,
+  time: 12.839900000000348,
+  medal: 'Gold',
+  word: 'SYNC',
+  code: '2026-11-04-C02',
+  realInputsOnly: true
+}

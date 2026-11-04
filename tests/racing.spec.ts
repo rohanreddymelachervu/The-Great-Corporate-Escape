@@ -64,7 +64,7 @@ test("sprint movement and Space dodge work, and there is no health/stamina/loot 
   expect(after).not.toHaveProperty("lootValue");
   expect(after.elapsed).toBeGreaterThan(before.elapsed);
 });
-test("capture shows a real red jargon punishment, stops race time and resets same patterns quickly", async ({
+test("sprint capture stays on its two-choice screen until an explicit restart, with frozen race time", async ({
   page,
 }) => {
   await ready(page);
@@ -76,8 +76,13 @@ test("capture shows a real red jargon punishment, stops race time and resets sam
   await expect(page.locator(".race-jargon-wall")).toContainText("CIRCLE BACK");
   await expect(page.locator("#race-modal")).toContainText("QUICKLY");
   const frozen = (await state(page)).elapsed;
-  await page.waitForTimeout(200);
+  await page.waitForTimeout(4500);
+  expect((await state(page)).phase).toBe("failed");
   expect((await state(page)).elapsed).toBe(frozen);
+  await expect(page.locator(".race-panel button")).toHaveCount(2);
+  await expect(page.locator("#race-retry-now")).toHaveText("RESTART LEVEL ↻");
+  await expect(page.locator("#race-failure-home")).toHaveText("MAIN MENU");
+  await page.locator("#race-retry-now").click();
   await page.waitForFunction(
     () => window.__sprint.snapshot().phase === "countdown",
     {},
@@ -286,6 +291,15 @@ for (const viewport of [
     await page.screenshot({
       path: `test-results/race-mobile-${viewport.width}.png`,
     });
+    const menu = await page.locator("#race-failure-home").boundingBox();
+    expect(menu!.height).toBeGreaterThanOrEqual(44);
+    expect(menu!.y).toBeGreaterThanOrEqual(0);
+    expect(menu!.y + menu!.height).toBeLessThanOrEqual(viewport.height);
+    await page.locator("#race-failure-home").tap();
+    await expect(page.locator("#menu")).toBeVisible();
+    expect((await page.evaluate(() => window.__sprint.audio())).requested).toBe(
+      false,
+    );
     await c.close();
   });
 
@@ -318,7 +332,135 @@ test("losing focus during countdown or a punishment screen cannot advance time o
   await page.waitForTimeout(1300);
   expect((await state(page)).phase).toBe("failed");
   expect((await state(page)).failureAge).toBe(age);
-  await page.locator("#race-resume").click();
+  await expect(page.locator(".race-punishment")).toBeVisible();
+  await expect(page.locator(".race-panel button")).toHaveCount(2);
+  await page.locator("#race-retry-now").click();
+  await page.waitForFunction(
+    () => window.__sprint.snapshot().phase === "countdown",
+    {},
+    { timeout: 3000 },
+  );
+});
+
+async function ringFailure(page: Page) {
+  await ready(page);
+  await page.locator("#sprint-mode-btn").click();
+  await page.locator('[data-race-course="1"]').click();
+  await page.waitForFunction(
+    () => window.__sprint.snapshot()?.phase === "running",
+  );
+  const g = (await state(page)).guards[0];
+  await pos(page, g.x, g.y);
+  await expect(page.locator(".race-punishment")).toBeVisible();
+  await page.waitForFunction(() => window.__sprint.audio().playing);
+}
+test("the uploaded MP3 decodes and rings until explicit restart, then stops without stacking", async ({
+  page,
+}) => {
+  await ringFailure(page);
+  const a = await page.evaluate(() => window.__sprint.audio());
+  expect(a.ready).toBe(true);
+  expect(a.loop).toBe(true);
+  expect(a.duration).toBeGreaterThan(25);
+  expect(a.duration).toBeLessThan(27);
+  await page.waitForTimeout(4200);
+  expect((await state(page)).phase).toBe("failed");
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    true,
+  );
+  await page.locator("#race-retry-now").click();
+  await page.waitForFunction(
+    () => window.__sprint.snapshot().phase === "running",
+  );
+  expect((await page.evaluate(() => window.__sprint.audio())).requested).toBe(
+    false,
+  );
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    false,
+  );
+  const g = (await state(page)).guards[0];
+  await pos(page, g.x, g.y);
+  await page.waitForFunction(() => window.__sprint.audio().playing);
+  await page.locator("#race-failure-home").click();
+  await expect(page.locator("#menu")).toBeVisible();
+  await page.waitForTimeout(250);
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    false,
+  );
+  expect((await page.evaluate(() => window.__sprint.audio())).requested).toBe(
+    false,
+  );
+});
+test("ringtone obeys mute, SFX zero, shared settings and focus loss without dismissing the two-choice screen", async ({
+  page,
+}) => {
+  await ringFailure(page);
+  await page.keyboard.press("m");
+  await page.waitForFunction(
+    () => window.__sprint.audio().muted && !window.__sprint.audio().playing,
+  );
+  await page.keyboard.press("m");
+  await page.waitForFunction(() => window.__sprint.audio().playing);
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    false,
+  );
+  const slider = page.getByLabel("Sound effects volume");
+  await slider.fill("0");
+  await slider.dispatchEvent("input");
+  await slider.dispatchEvent("change");
+  await page.getByRole("button", { name: "DONE", exact: false }).click();
+  await page.waitForTimeout(120);
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    false,
+  );
+  expect((await page.evaluate(() => window.__sprint.audio())).sfxVolume).toBe(
+    0,
+  );
+  await page.getByRole("button", { name: "Settings", exact: true }).click();
+  await slider.fill("0.8");
+  await slider.dispatchEvent("input");
+  await slider.dispatchEvent("change");
+  await page.getByRole("button", { name: "DONE", exact: false }).click();
+  await page.waitForFunction(() => window.__sprint.audio().playing);
+  await page.evaluate(() => window.dispatchEvent(new Event("blur")));
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    false,
+  );
+  await expect(page.locator(".race-panel button")).toHaveCount(2);
+  await expect(page.locator("#race-failure-home")).toBeVisible();
+  await page.locator("#race-failure-home").click();
+  await expect(page.locator("#menu")).toBeVisible();
+  expect((await page.evaluate(() => window.__sprint.audio())).requested).toBe(
+    false,
+  );
+});
+test("Space does not auto-dismiss the failure screen but activates the focused Main Menu choice", async ({
+  page,
+}) => {
+  await ringFailure(page);
+  await page.keyboard.press("Space");
+  await expect(page.locator(".race-punishment")).toBeVisible();
+  expect((await state(page)).phase).toBe("failed");
+  await page.locator("#race-failure-home").focus();
+  await page.keyboard.press("Space");
+  await expect(page.locator("#menu")).toBeVisible();
+  expect((await page.evaluate(() => window.__sprint.audio())).playing).toBe(
+    false,
+  );
+});
+test("Buzzword Run keeps its existing quick-retry behavior and does not play the supplied Sprint ringtone", async ({
+  page,
+}) => {
+  await ready(page);
+  await start(page, "buzzword");
+  const g = (await state(page)).guards[0];
+  await pos(page, g.x, g.y);
+  await expect(page.locator(".race-punishment")).toBeVisible();
+  await expect(page.locator("#race-auto-retry")).toBeVisible();
+  expect((await page.evaluate(() => window.__sprint.audio())).requested).toBe(
+    false,
+  );
   await page.waitForFunction(
     () => window.__sprint.snapshot().phase === "countdown",
     {},

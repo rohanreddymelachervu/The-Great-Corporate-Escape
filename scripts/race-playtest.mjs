@@ -165,7 +165,7 @@ async function run(mode, course) {
     );
     // On a retry, deliberately vary the departure timing as a player would.
     // This costs actual race time and does not alter the course or its patterns.
-    if(attempt>1)await page.waitForTimeout((attempt-1)*230);
+    if (attempt > 1) await page.waitForTimeout((attempt - 1) * 230);
     const initial = await state();
     let goals = initial.route.slice(1);
     if (mode === "buzzword") {
@@ -227,11 +227,11 @@ async function run(mode, course) {
     await page.screenshot({
       path: `test-results/${mode}-${course}-attempt-${attempt}.png`,
     });
-    // Auto-retry is part of the game. A running timeout is retried through its normal R key.
+    // Failed pure sprints wait for an explicit choice; use the normal restart button.
     if (s.phase === "running") {
       await page.keyboard.press("r");
-    } else if (s.phase === "failed" && s.failureAge >= 0.15) {
-      await page.keyboard.press("r");
+    } else if (s.phase === "failed") {
+      await page.locator("#race-retry-now").click();
     }
     await page.waitForTimeout(120);
   }

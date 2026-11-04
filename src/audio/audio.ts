@@ -1,5 +1,7 @@
+import { TEAMS_RINGTONE_BASE64 } from "./teams-ringtone";
 /**
- * Original, browser-synthesized soundtrack and foley. Nothing is loaded from a URL.
+ * Original synthesized soundtrack/foley plus a user-supplied embedded call ringtone.
+ * No external audio requests are made.
  * The single look-ahead clock only runs while an unlocked context is running.
  */
 export class OfficeAudio {
@@ -21,6 +23,11 @@ export class OfficeAudio {
   private paused = false;
   private unlocked = false;
 
+  private callBuffer: AudioBuffer | null = null;
+  private callDecode: Promise<void> | null = null;
+  private callSource: AudioBufferSourceNode | null = null;
+  private callRequested = false;
+
   constructor() {
     // A context is deliberately NOT constructed until the user's first gesture.
   }
@@ -37,6 +44,7 @@ export class OfficeAudio {
       void ctx
         .resume()
         .then(() => {
+          this.syncCallRingtone();
           if (!this.paused && this.mode && this.clock === null)
             this.startClock();
         })
@@ -55,6 +63,7 @@ export class OfficeAudio {
     this.sfxVolume = this.clamp(sfx);
     this.muted = mute;
     this.applyVolumes();
+    this.syncCallRingtone();
   }
 
   /** Always resets the arrangement, even when selecting the current mode. */
@@ -148,9 +157,86 @@ export class OfficeAudio {
     }
   }
 
+  /** The uploaded MP3 loops only while its failure screen is waiting for a choice. */
+  startCallRingtone(): void {
+    this.callRequested = true;
+    this.applyVolumes();
+    this.syncCallRingtone();
+  }
+  stopCallRingtone(): void {
+    this.callRequested = false;
+    this.stopCallSource();
+    this.applyVolumes();
+  }
+  ringtoneState() {
+    return {
+      requested: this.callRequested,
+      playing: !!this.callSource,
+      ready: !!this.callBuffer,
+      duration: this.callBuffer?.duration || 0,
+      loop: this.callSource?.loop || false,
+      muted: this.muted,
+      sfxVolume: this.sfxVolume,
+      paused: this.paused,
+    };
+  }
+  private stopCallSource(): void {
+    const source = this.callSource;
+    this.callSource = null;
+    if (source) {
+      try {
+        source.stop();
+      } catch {}
+      source.disconnect();
+    }
+  }
+  private syncCallRingtone(): void {
+    const ctx = this.context;
+    if (
+      !this.callRequested ||
+      this.paused ||
+      this.muted ||
+      this.sfxVolume <= 0 ||
+      !this.unlocked ||
+      ctx?.state !== "running"
+    ) {
+      this.stopCallSource();
+      return;
+    }
+    if (!this.callBuffer) {
+      if (!this.callDecode) {
+        const bytes = Uint8Array.from(atob(TEAMS_RINGTONE_BASE64), (c) =>
+          c.charCodeAt(0),
+        );
+        this.callDecode = ctx
+          .decodeAudioData(bytes.buffer)
+          .then((buffer) => {
+            this.callBuffer = buffer;
+            this.syncCallRingtone();
+          })
+          .catch(() => {
+            /* Unsupported audio must never trap the failure buttons. */
+          });
+      }
+      return;
+    }
+    if (this.callSource || !this.sfxGain) return;
+    const source = ctx.createBufferSource();
+    source.buffer = this.callBuffer;
+    source.loop = true;
+    source.connect(this.sfxGain);
+    this.callSource = source;
+    source.onended = () => {
+      if (this.callSource === source) this.callSource = null;
+      source.disconnect();
+    };
+    source.start();
+  }
+
   /** Freezes playback and clears all pending sequencer work. */
   suspend(): void {
     this.paused = true;
+    this.stopCallSource();
     this.stopClock();
     this.stopSources(this.fxSources);
     if (this.context && this.context.state !== "closed")
@@ -165,6 +251,7 @@ export class OfficeAudio {
     void ctx
       .resume()
       .then(() => {
+        this.syncCallRingtone();
         if (!this.paused && this.mode && this.clock === null) this.startClock();
       })
       .catch(() => {});
@@ -208,6 +295,7 @@ export class OfficeAudio {
     // Safari/mobile can interrupt the context independently of the game.
     ctx.onstatechange = () => {
       if (ctx.state !== "running") {
+        this.stopCallSource();
         this.stopClock();
       } else if (
         this.mode &&
@@ -217,6 +305,7 @@ export class OfficeAudio {
       ) {
         this.startClock();
       }
+      this.syncCallRingtone();
     };
   }
 
@@ -226,7 +315,10 @@ export class OfficeAudio {
     const time = ctx.currentTime;
     // The lower music gain leaves generous headroom for overlapping voices.
     const values: [GainNode, number][] = [
-      [this.musicGain, this.muted ? 0 : this.musicVolume * 0.42],
+      [
+        this.musicGain,
+        this.muted || this.callRequested ? 0 : this.musicVolume * 0.42,
+      ],
       [this.sfxGain, this.muted ? 0 : this.sfxVolume * 0.7],
     ];
     for (const [node, value] of values) {

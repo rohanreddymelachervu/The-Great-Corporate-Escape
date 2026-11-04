@@ -1,0 +1,20 @@
+
+Running 15 tests using 1 worker
+
+  ✓   1 tests/racing.spec.ts:30:1 › both racing modes are separate, visible and all ten sprint courses are selectable (3.5s)
+  ✓   2 tests/racing.spec.ts:49:1 › sprint movement and Space dodge work, and there is no health/stamina/loot score (2.9s)
+  ✓   3 tests/racing.spec.ts:67:1 › sprint capture stays on its two-choice screen until an explicit restart, with frozen race time (7.7s)
+  ✓   4 tests/racing.spec.ts:99:1 › pause, shared sound settings and focus loss do not advance the stopwatch (4.1s)
+  ✓   5 tests/racing.spec.ts:126:1 › an open sprint exit finishes immediately and stores only a raw time in racing records (3.8s)
+  ✓   6 tests/racing.spec.ts:157:1 › Buzzword Run is UTC-daily, collects automatically in any order and refuses an incomplete exit (3.4s)
+  ✓   7 tests/racing.spec.ts:195:1 › Buzzword retry clears letters and clock but preserves that day’s layout and word (2.6s)
+  ✓   8 tests/racing.spec.ts:215:1 › switching races back to the existing heist preserves its controls, progress and difficulty (3.7s)
+  ✓   9 tests/racing.spec.ts:246:3 › racing HUD, touch input and red retry are usable at 390×844 (3.9s)
+  ✓  10 tests/racing.spec.ts:246:3 › racing HUD, touch input and red retry are usable at 844×390 (3.7s)
+  ✓  11 tests/racing.spec.ts:306:1 › losing focus during countdown or a punishment screen cannot advance time or auto-retry unseen (5.1s)
+  ✓  12 tests/racing.spec.ts:357:1 › the uploaded MP3 decodes and rings until explicit restart, then stops without stacking (9.3s)
+  ✓  13 tests/racing.spec.ts:394:1 › ringtone obeys mute, SFX zero, shared settings and focus loss without dismissing the two-choice screen (4.6s)
+  ✓  14 tests/racing.spec.ts:438:1 › Space does not auto-dismiss the failure screen but activates the focused Main Menu choice (4.0s)
+  ✓  15 tests/racing.spec.ts:452:1 › Buzzword Run keeps its existing quick-retry behavior and does not play the supplied Sprint ringtone (3.9s)
+
+  15 passed (1.1m)

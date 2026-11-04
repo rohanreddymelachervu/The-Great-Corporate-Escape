@@ -945,10 +945,12 @@ sprintUi = setupSprintModes({
   reducedMotion: () => scene.reducedMotion,
 });
 const raceInspection: {
+  audio: () => unknown;
   snapshot: () => unknown;
   ready: () => boolean;
   qa?: unknown;
 } = {
+  audio: () => audio.ringtoneState(),
   snapshot: () => sprintScene.snapshot(),
   ready: () =>
     sprintScene.scene.isActive() &&

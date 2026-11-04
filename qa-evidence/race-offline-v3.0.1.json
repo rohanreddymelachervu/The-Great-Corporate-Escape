@@ -1,0 +1,62 @@
+{
+  "at": "2026-11-04T07:46:26.837Z",
+  "reports": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "mobile": false,
+      "dodgeDistance": 73.14750000000001,
+      "redLoss": true,
+      "clockFrozen": true,
+      "persistentFailure": true,
+      "uploadedRingtone": true,
+      "waitedThroughFullLoop": true,
+      "explicitRestart": true,
+      "wordBadges": 4,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "qaAvailable": false,
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mobile": true,
+      "dodgeDistance": 116.19700000020691,
+      "redLoss": true,
+      "clockFrozen": true,
+      "persistentFailure": true,
+      "uploadedRingtone": true,
+      "waitedThroughFullLoop": false,
+      "explicitRestart": true,
+      "wordBadges": 4,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "qaAvailable": false,
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mobile": true,
+      "dodgeDistance": 119.36050000013785,
+      "redLoss": true,
+      "clockFrozen": true,
+      "persistentFailure": true,
+      "uploadedRingtone": true,
+      "waitedThroughFullLoop": false,
+      "explicitRestart": true,
+      "wordBadges": 4,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "qaAvailable": false,
+      "errors": []
+    }
+  ]
+}

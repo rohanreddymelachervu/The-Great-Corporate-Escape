@@ -1,3 +1,34 @@
+# v3.0.1 QA — persistent Sprint failure menu and uploaded ringtone
+
+4 November 2026. Supersedes the Sprint failure-screen policy described in the archived v3.0 report below.
+
+## Requested change
+
+Clock Out Sprint now keeps the red corporate-jargon failure screen open until an explicit choice: Restart Level or Main Menu. No Continue button and no automatic retry. The clock stays frozen. Restart resets the same course/pattern; Main Menu returns to the normal title screen. Space no longer dismisses an unfocused Sprint failure screen, but keyboard activation of a focused button works. R remains a deliberate restart shortcut. Touch targets for both choices are in-bounds and at least 44px high.
+
+The exact uploaded Microsoft_Teams_Incoming_Call_Sound-646775-mobiles24.mp3 is embedded without re-encoding: 418,795 bytes; SHA-256 03f47b85c57c3401bbda6ea0f96c8c194d56f4044ed42d794bbb26464aad1374. MP3 container duration is approximately 26.17s. WebAudio decodes and loops it while awaiting a choice. This is user-supplied third-party audio, not the old synthesized substitute; no official provenance or redistribution license is asserted. Asset provenance is preserved in licenses/USER-SUPPLIED-AUDIO.txt, including the offline build's notices.
+
+Playback obeys mute and SFX gain, ducks the game music, stops on restart/menu/scene shutdown, and suspends on settings/focus loss. Async decode rechecks whether the call is still requested before starting; one source is active at a time. Failure-state pause keeps the same two-choice screen instead of replacing it with a generic menu containing Resume. No resuming a failed ranked run is implemented.
+
+Only Clock Out Sprint gets this behavior. Existing Office Heist and Buzzword Run rules/retries are preserved.
+
+## Executed final checks
+
+- Production build and strict TypeScript: PASS. Portable HTML and docs/index.html match byte-for-byte.
+- 825 unit/data checks: PASS, including a cryptographic identity check against the uploaded MP3.
+- 62 browser journeys: PASS (47 existing heist, 15 racing). The updated focused 15-racing suite also passed after adding both mobile failure-button bounds and actual Main Menu touch activation.
+- Ringtone-specific browser checks: real MP3 decoding, looping source/duration, persistent two-choice failure, explicit restart and repeat capture, Main Menu cleanup, M mute/unmute, SFX zero/restoration, shared settings suspension/resume, focus-loss suspension, keyboard Main Menu activation, and unchanged Buzzword quick retry.
+- Six offline production checks: PASS, across desktop and both mobile orientations for existing heist and racing. The desktop Sprint failure was left open for 28 seconds, beyond the uploaded recording's duration; the ringtone was still playing and no retry occurred. Both touch orientations also verified the persistent loss screen, uploaded ringtone, frozen clock, explicit restart and daily startup. No JavaScript errors or network dependencies.
+- Real-input production traversal: all ten Sprint courses plus today's SYNC Buzzword race completed again. Failed Sprint attempts now use the visible restart button rather than relying on auto-retry. No position/clock/health/win mutation.
+
+Build: 2605927 bytes. SHA-256 693dfbfbbb3ad9dc00ba8d97f5d1e193bc09b1d42efbe7cb481eaf6b161b1206.
+
+Physical speaker output, physical mobile hardware and non-Chromium browsers remain unmeasured. Audio checks establish decoded uploaded bytes and active WebAudio source/lifecycle, not a physical acoustic recording. The existing GitHub Pages deployment setting is not changed; the owner redeploys main/docs.
+
+---
+
+## Archived v3.0 report — prior behavior
+
 # v3.0 QA — Clock Out Sprint + Buzzword Run
 
 4 November 2026. Two new isolated racing modes, with the existing Office Heist retained.

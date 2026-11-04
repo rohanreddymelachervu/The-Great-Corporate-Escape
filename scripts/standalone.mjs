@@ -20,9 +20,12 @@ if (cssMatch) {
   html = html.replace(cssMatch[0], () => `<style>${css}</style>`);
 }
 const notices = await Promise.all(
-  ["Barlow-Condensed-OFL.txt", "IBM-Plex-Mono-OFL.txt", "Phaser-MIT.txt"].map(
-    (name) => readFile("licenses/" + name, "utf8"),
-  ),
+  [
+    "Barlow-Condensed-OFL.txt",
+    "IBM-Plex-Mono-OFL.txt",
+    "Phaser-MIT.txt",
+    "USER-SUPPLIED-AUDIO.txt",
+  ].map((name) => readFile("licenses/" + name, "utf8")),
 );
 html +=
   "\n<!-- Bundled third-party notices\n" + notices.join("\n\n") + "\n-->\n";

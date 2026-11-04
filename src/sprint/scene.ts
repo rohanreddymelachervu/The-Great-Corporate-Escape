@@ -153,6 +153,7 @@ export class SprintScene extends Phaser.Scene {
     };
     this.events.on("resume", resumed);
     this.events.once("shutdown", () => {
+      this.audio.stopCallRingtone();
       this.input.keyboard?.off("keydown", key);
       this.events.off("resume", resumed);
       this.scale.off("resize", this.resize, this);
@@ -225,7 +226,8 @@ export class SprintScene extends Phaser.Scene {
       if (e.type === "letter") this.audio.sfx("item");
       if (e.type === "locked") raceEmit("notice", e.text);
       if (e.type === "fail") {
-        this.audio.sfx("meeting-call");
+        if (this.run.options.mode === "sprint") this.audio.startCallRingtone();
+        else this.audio.sfx("meeting-call");
         if (!this.reducedMotion) this.cameras.main.shake(100, 0.002);
         raceEmit("fail", {
           reason: e.text,
@@ -273,6 +275,7 @@ export class SprintScene extends Phaser.Scene {
       this.stepAt = this.run.elapsed + 0.25;
     }
     if (
+      this.run.options.mode === "buzzword" &&
       this.run.phase === "failed" &&
       this.run.failureAge >= 1.1 &&
       !this.autoSent

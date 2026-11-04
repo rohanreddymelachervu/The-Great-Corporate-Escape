@@ -1,4 +1,4 @@
-# THE GREAT OFFICE ESCAPE: 4:59 PM — Three Ways to Clock Out v3.0
+# THE GREAT OFFICE ESCAPE: 4:59 PM — Three Ways to Clock Out v3.0.1
 
 > You've finished your work. Unfortunately, nobody else has.
 
@@ -18,7 +18,9 @@ Choose any of **ten short authored courses**. Move with WASD/arrows or joystick,
 
 Your result is **active race time**, displayed in hundredths. Lower is better; records and medal boundaries agree with that display precision. Countdown, pause and loss-screen time do not count. Gold/Silver targets are per course. All ten courses are selectable without affecting heist unlocks; Next Course provides a natural difficulty progression through timing, route choices and readable pattern combinations.
 
-A catch stops the clock and triggers a **deep-red corporate-jargon punishment wall** with an original meeting-call chime, then an automatic quick retry of the same course/pattern. R/Space or Retry can return sooner after a short guard. The cue is original WebAudio, **not an embedded Microsoft Teams recording or copied ringtone**. Mute and SFX volume apply. There is no flashing punishment; reduced motion removes word-stamp animation.
+A catch stops the clock and triggers a **deep-red corporate-jargon incoming-call screen**. In Clock Out Sprint it stays open indefinitely until the player explicitly chooses **Restart Level** or **Main Menu**. There is no Continue button or automatic retry. Restart retains the same course/pattern; Main Menu returns to the normal title menu without changing records. R is an explicit restart shortcut. Space only activates a focused failure-menu button; it no longer skips an unfocused Sprint failure screen.
+
+The Sprint screen loops the **exact MP3 uploaded by the project owner**, embedded byte-for-byte for offline use. This is no longer the synthesized substitute. The ringtone stops on restart/menu/course changes, pauses when focus is lost or settings open, and respects mute and SFX volume. Game music is ducked during the call. The ringtone is third-party user-provided audio, not part of the original soundtrack or the app's MIT-licensed assets; see licenses/USER-SUPPLIED-AUDIO.txt. Buzzword Run keeps its existing brief synthesized chime and automatic quick retry. No flashing punishment is used; reduced motion removes word-stamp animation.
 
 The ten courses are Quick Sync, Reply All, Mandatory Happiness, Scope Creep, The Pivot, Friday Deployment, Bandwidth Issues, Return To Office, Alignment Workshop and Exit Interview. Experienced map-aware play can clear them much faster than a new exploratory player; there is no forced minimum wait.
 
@@ -164,7 +166,7 @@ Build outputs:
 - `release/office-escape.html`: portable offline single-file game.
 - `docs/index.html` and `docs/.nojekyll`: the same game prepared for branch-based GitHub Pages. `docs` is intentionally committed.
 
-The approximately 2.04 MB uncompressed release contains Phaser, fonts, artwork code, audio code and legal notices. The large-chunk warning is expected: runtime CDN dependency was deliberately avoided.
+The approximately 2.61 MB uncompressed release contains Phaser, fonts, artwork code, audio code and legal notices. The large-chunk warning is expected: runtime CDN dependency was deliberately avoided.
 
 ```sh
 npx playwright install chromium
@@ -176,8 +178,8 @@ npm run test:campaign
 
 `CHROMIUM_PATH` optionally selects an existing Chromium executable. Otherwise Playwright uses its managed browser.
 
-- **824 unit/data tests across the app:** geometry, navigation, saves, RNG, maps, sixty-three encounter-director checks, seventy-two enemy checks, thirty-two meeting-traffic checks, twenty loot checks, HR rhythm logic legacy-score migration, a twenty-one-check social model, and eleven UX/difficulty/report checks.
-- **58 browser journeys across the app:** actual keyboard and touch dodges, arrow/WASD movement, windup/locked-aim behavior, warnings before hits, real hazard dodge credit, camping consequences, lift timing/boarding, optional sabotage, recovery, alternative WFH, loss/retry, settings, daily seed, responsive bounds HR activity success/failure, all eight animated hit scenes, lethal-hit recovery, long-haul skipping, held theft, snack recovery, bank/loss rules and real meeting-room walkouts.
+- **825 unit/data tests across the app:** geometry, navigation, saves, RNG, maps, sixty-three encounter-director checks, seventy-two enemy checks, thirty-two meeting-traffic checks, twenty loot checks, HR rhythm logic legacy-score migration, a twenty-one-check social model, and eleven UX/difficulty/report checks.
+- **62 browser journeys across the app:** actual keyboard and touch dodges, arrow/WASD movement, windup/locked-aim behavior, warnings before hits, real hazard dodge credit, camping consequences, lift timing/boarding, optional sabotage, recovery, alternative WFH, loss/retry, settings, daily seed, responsive bounds HR activity success/failure, all eight animated hit scenes, lethal-hit recovery, long-haul skipping, held theft, snack recovery, bank/loss rules and real meeting-room walkouts.
 - **Three offline production checks:** desktop plus portrait/landscape touch startup, input, dodge, coffee and pause with network disabled and no production QA helpers.
 - **Real-input production campaign:** the map-aware controller plays all five floors without positioning, health, timer or win hooks. It can attempt a floor at most three times, using actual optional sabotage after a failed attempt; failures are recorded, not hidden. Focused development runs may explicitly skip unlocks, but full production runs do not.
 
@@ -213,7 +215,8 @@ src/ui/fun-ui.ts             HR activity controls and cleanup-safe animation
 src/ui/hit-scenes.ts         Eight original skippable animated hit cutaways
 src/art/loot.ts              Original pixel TVs, snacks, keyboards and other loot
 src/art/art.ts               Original pixel sprites and once-baked office artwork
-src/audio/audio.ts           Original WebAudio music, synthesizers and foley
+src/audio/audio.ts           WebAudio music/foley and uploaded ringtone lifecycle
+src/audio/teams-ringtone.ts  Byte-exact embedded user-supplied MP3
 src/ui/style.css             Non-overlapping responsive HUD/map/control layout
 scripts/standalone.mjs       Portable HTML and GitHub Pages packaging
 ```
@@ -232,6 +235,6 @@ Future updates: build, test and commit both source and regenerated `docs/index.h
 
 ## Licenses and remaining limits
 
-Original sprites, office art, dialogue, layouts, sound and music are generated locally. Application source is MIT licensed. Phaser's MIT notice and Barlow Condensed / IBM Plex Mono SIL Open Font License notices are preserved in `licenses`, hosted builds and the portable file. No remote image/audio/font service is required during play.
+Original sprites, office art, dialogue, layouts, synthesized effects and music are generated locally. The Sprint failure ringtone is a separate user-supplied third-party recording; its rights are not asserted or independently verified by this project. Application source is MIT licensed. Phaser's MIT notice and Barlow Condensed / IBM Plex Mono SIL Open Font License notices are preserved in `licenses`, hosted builds and the portable file. No remote image/audio/font service is required during play.
 
 Physical iOS/Android hardware and Safari/Firefox have not been tested. Daily competition and saves remain local/honor-system. World characters use expressive sprites, bob/flip movement and dash ghosts rather than full directional animation sheets; hit cutaways add original staged character and object animation. This is a compact arcade-stealth survival game, not a long narrative RPG. A map-aware controller clears floors faster than a first-time exploratory player; pacing and subjective enjoyment still need human feedback.
