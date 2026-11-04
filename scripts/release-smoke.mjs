@@ -31,7 +31,7 @@ for (const viewport of [
   await page.screenshot({
     path: `test-results/release-menu-${viewport.width}.png`,
   });
-  await page.getByRole("button", { name: "CLOCK OUT" }).click();
+  await page.locator("#play-btn").click();
   await page.waitForFunction(() => window.__office.snapshot().elapsed > 0.4);
   const state = () => page.evaluate(() => window.__office.snapshot()),
     before = await state();

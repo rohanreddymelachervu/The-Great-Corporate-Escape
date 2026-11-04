@@ -1,0 +1,115 @@
+
+> the-great-office-escape@3.0.0 test:races
+> node scripts/race-playtest.mjs
+
+ESCAPED {
+  mode: 'sprint',
+  courseId: 1,
+  attempt: 1,
+  time: 9.940700000000172,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C01',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 2,
+  attempt: 1,
+  time: 8.672699999999702,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C02',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 3,
+  attempt: 1,
+  time: 14.877500000000005,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C03',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 4,
+  attempt: 1,
+  time: 7.836700000000168,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C04',
+  realInputsOnly: true
+}
+CAUGHT sprint 5 1 manager booked a surprise catch-up. Escape cancelled. { x: 340.0056502372263, y: 366.4846502371862 }
+ESCAPED {
+  mode: 'sprint',
+  courseId: 5,
+  attempt: 2,
+  time: 8.832100000000072,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C05',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 6,
+  attempt: 1,
+  time: 16.568699999999744,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C06',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 7,
+  attempt: 1,
+  time: 8.759999999999973,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C07',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 8,
+  attempt: 1,
+  time: 11.38009999999963,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C08',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 9,
+  attempt: 1,
+  time: 16.830500000000022,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C09',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'sprint',
+  courseId: 10,
+  attempt: 1,
+  time: 12.842000000000004,
+  medal: 'Gold',
+  word: undefined,
+  code: 'SPRINT-C10',
+  realInputsOnly: true
+}
+ESCAPED {
+  mode: 'buzzword',
+  courseId: 2,
+  attempt: 1,
+  time: 13.051800000000757,
+  medal: 'Gold',
+  word: 'SYNC',
+  code: '2026-11-04-C02',
+  realInputsOnly: true
+}

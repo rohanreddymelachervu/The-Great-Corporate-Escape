@@ -1,75 +1,96 @@
-# Clearer Escapes v2.2 — UX and Character Interaction QA
+# v3.0 QA — Clock Out Sprint + Buzzword Run
 
-2 November 2026. Scope: make the existing game easier to learn and add personality without raising difficulty. Source and rebuilt main/docs stay in the same repository; hosting settings are not changed.
+4 November 2026. Two new isolated racing modes, with the existing Office Heist retained.
 
-## Implemented
+## Delivered
 
-- Main strip presents Dodge, Throw Coffee and Fake Call. Optional advanced tools are under More Tools, with clear functional names and descriptions; the office pauses while choosing and a ready selection returns to play and activates once. Keyboard shortcuts 3–5 remain available.
-- Brief, remembered, dismissible context tips teach relevant actions without stopping gameplay. Tips can be turned off.
-- One shared danger grammar: common vision cones, outlined incoming hazards, filled active areas, mint interactions and a gold objective arrow. Numeric geometry and timings are unchanged.
-- Only the actual current E target/in-progress steal shows a detailed loot label, matching what E will do.
-- Purple house tokens automatically open WFH exits; no extra numbered action is required. The lift still works and key 6 remains a harmless compatibility explanation.
-- A natural intern–founder meetup uses the existing actors: approach valid standing spots, face one another, gesture, show an animated AGENT demo and exchange five alternating lines over eight seconds. No teleport, new actor, player control, forced camera or damage. At most one attempt per run; busy actors give a breather, not an additional attack.
-- Existing meeting attendees have clearer walking, book/hand and noticing reactions. Their model, counts, schedules, speed, sight and damage remain the same.
-- An optional collapsed incident report after a run uses actual recorded counters/loot and can be shared using the existing Share button. It adds no gameplay rule or score system.
+### Clock Out Sprint
 
-## Difficulty preservation — verified
+Ten distinct authored courses; move/sprint/dodge only. No loot, active abilities, BS/stamina meter, heist cutaway or elevator wait. The exit is open immediately. The result and record are active completion time, not derived points. Lower is better. Countdown, pause and failed-screen time are excluded. Gold targets are displayed accurately and medals/PB ties agree with the displayed centisecond precision.
 
-`qa-evidence/difficulty-v21.json` was captured before changing the v2.1 release. Regression tests compare:
-- Every major enemy's speed, range, FOV and damage.
-- Ability cooldowns, durations and unlock floors.
-- All lift waits.
-- World dimensions, initial enemy roster/patrols, room traffic counts and schedules.
+Courses: Quick Sync, Reply All, Mandatory Happiness, Scope Creep, The Pivot, Friday Deployment, Bandwidth Issues, Return To Office, Alignment Workshop, Exit Interview. All selectable without heist unlocks. Progression adds route/pattern combinations rather than unpredictable tracking or extreme speeds.
 
-These values are unchanged. Existing director and traffic tests continue to cover damage, grace, warning windows and movement. No new foes or harder wave frequency were added. Social chats can suppress those occupied characters' attacks temporarily, and automatic WFH is a convenience benefit. This is not a claim of an identical human win rate.
+### Buzzword Run
 
-## Final executed checks
+Separate UTC-daily course/word/letter layout, seeded and shared for the same build/date. Curated sixteen-word corporate dictionary, four to seven letters, each with a finish punchline. Automatic unordered collection, correct indexed slots including duplicate characters, exit locked only until all badges are collected. At least one side-pocket badge is included where the authored template offers one. No inventory/spelling menu or extra letter points. Separate local daily records and shareable challenge codes.
 
-### Build — PASS
+### Humour and failure
 
-TypeScript, Vite and portable/GitHub Pages packaging pass. The expected large-bundle warning remains because the engine/fonts are self-contained rather than fetched from a CDN.
+Deep-red corporate-jargon wall, rotating failure quips, short original meeting-call chime, same-pattern automatic quick retry. R/Space/Retry can return sooner after a short guard. The sound is an original WebAudio motif, not a Microsoft Teams recording or copied ringtone. Mute/SFX volume and reduced motion are respected. No flashing/strobing punishment. Finish screens add corporate performance reviews and personal-best jokes after the clock has stopped.
 
-Final `docs/index.html` / portable game: **1,990,245 bytes**.
-SHA-256: **248e59d059cdb4bac07ecc307b4e5f590a5a77687f27cf25b6a978bb3d4dc92c**.
+## Executed checks
 
-### Unit/data checks — 739 PASS
+### Production build — PASS
 
-388 expanded-map/data checks; 100 shared logic/save checks; 72 enemy FSM checks; 63 director checks; 32 meeting traffic checks; 30 HR rhythm checks; 21 social-model checks; 20 loot checks; 11 context/report/difficulty checks; 2 progression migration checks.
+TypeScript, Vite and portable/Pages packaging pass. The expected large-chunk warning is retained because runtime engine/fonts are bundled rather than fetched from a CDN.
 
-### Browser journeys — 47 PASS
+`docs/index.html` and portable game: **2,043,839 bytes**.
+SHA-256: **59e5af30c2aa2757d6f1853906747d8a85d9d4d9acee53efe955f0c824571c76**.
 
-All 38 prior scenarios pass, including all eight hit cutaways, Long haul/skip, lethal-hit recovery, held theft/cancellation, score banking/loss, meeting walkouts/spotting, touch and layout checks.
+### Unit/data suites — 824 PASS
 
-Nine added scenarios verify:
-1. Only primary tools appear initially; More Tools pauses, explains and activates correctly.
-2. Advanced shortcuts still work without the drawer.
-3. Tips dismiss without pausing and the preference persists.
-4. Exactly one intended loot target is labelled with a clear E prompt.
-5. A WFH token opens the exit without a numbered activation.
-6. The intern and founder naturally meet in the actual authored floor, physically approach, display alternating animated conversation, remain distracted and finish normally.
-7. The optional report reflects actual snack/loot/escape facts.
-8–9. Primary controls and optional drawer remain usable in portrait and landscape touch viewports.
+All 739 previous heist/UX/social/map/logic tests remain passing, plus:
+- 52 sprint-course geometry/content checks: ten distinct layouts, walls/props, reachable exits/letter sites, swept routes, legal predictable guard routes, safe starts and hazard periods/bounds.
+- 26 pure racing model checks: countdown, raw active time, diagonal/wall movement, dash, guard vision/LOS/contact, telegraphed hazards, retry, automatic letters, duplicate characters, locked exit, time-only result, medals and deterministic daily generation across 90 dates.
+- 7 record checks: lower-is-better, centisecond ties, mode/date separation, existing-heist key untouched, denied/corrupt storage and no points field.
 
-Natural chat validation used the real existing actor routes and a reproducible development seed, not a forced actor-position/chat hook. Player-only QA positioning was used to inspect the animation up close. Other isolated integration tests retain explicitly development-only positioning/hit helpers; these are not claimed as full no-cheat runs.
+### Browser journeys — 58 PASS
 
-### Offline production smoke — 3 PASS
+All 47 previous heist journeys still pass. Eleven racing journeys verify:
+1. Distinct menu entries and ten accessible courses.
+2. Actual keyboard movement/dodge, with no racing health, stamina or loot state.
+3. Real guard capture, red jargon punishment, stopped failure clock and same-pattern reset.
+4. Pause, shared sound settings and focus-loss clock freezing.
+5. Immediate sprint exit and raw-time storage, then Next Course.
+6. Fixed UTC daily mode, unordered automatic badges, incomplete-exit refusal, completed word/joke and separate records.
+7. Retry clearing letters/time while preserving that day's word/layout.
+8. Returning from racing to a fully functioning existing heist.
+9–10. Portrait and landscape touch controls, disjoint HUD/map/dock, red retry bounds and >=44px button.
+11. Countdown/failure focus loss cannot advance unseen or auto-retry in the background.
 
-Networking disabled; production HTML loaded from file at 1280×900, 390×844 and 844×390. Actual movement/dodge, coffee, pause and viewport fit passed. No horizontal overflow, production QA helper or JavaScript error.
+Focused integration tests use development-only positioning to isolate capture/exit/letter behavior; they are not misrepresented as no-cheat playthroughs. These helpers are absent in production.
 
-### Simple-controls production campaign — ALL FIVE PASS
+### Offline production checks — 6 PASS
 
-Executed `SIMPLE_CONTROLS=1 npm run test:campaign` on the portable production release. This mode skips advanced ability shortcuts; play used movement/sprint, E, Space, Coffee and Fake Call. No player-position, health, clock or win mutation was available or used. The controller knows the authored map and reads the public read-only snapshot, so this demonstrates functionality/viability, not first-time human learnability.
+The self-contained production file was loaded with networking disabled:
+- Three existing-heist desktop/portrait/landscape smoke checks: actual movement, dodge, coffee and pause.
+- Three racing desktop/portrait/landscape checks: native keyboard/touch movement and dash, a deliberately reached real guard capture, red failure UI, stopped clock, auto retry, Buzzword startup, viewport fit and no overflow.
 
-| Floor | Game seconds | Final BS | Sightings | Hits | Dodge credits | Route |
-|---|---:|---:|---:|---:|---:|---|
-| Quick Sync | 30.6 | 16 | 0 | 1 | 1 | Lift |
-| Mandatory Fun Friday | 36.1 | 10 | 2 | 1 | 1 | Lift |
-| Yappening | 42.0 | 12 | 2 | 1 | 1 | Lift |
-| All-Hands Ambush | 47.8 | 55 | 7 | 3 | 0 | Lift |
-| Founder Mode | 49.8 | 25 | 6 | 2 | 1 | Lift |
+No JavaScript errors or production QA helpers occurred. Audio synthesis paths were exercised without errors; physical speaker output was not measured.
 
-All five passed on the first attempt in this final run. Automatic WFH is separately integration-tested; this run used all regular lifts.
+### Real-input production course playtest — ALL TEN + DAILY PASS
 
-## Retained limits
+Ran `npm run test:races` against the portable production HTML. Actual keyboard input only: no position, clock, health or win mutation. The controller reads the read-only snapshot, knows the authored maps and can deliberately vary its departure timing on bounded retries. It is an automated completion check, not a human difficulty/fun study.
 
-Physical iOS/Android devices, Safari and Firefox remain untested. Difficulty and subjective enjoyment still benefit from human feedback. Social chats are opportunistic, only where the existing actors can meet; they are not guaranteed on every floor/run. Local/honor-system records, no backend/LLM/analytics, original procedural art/audio and the existing larger maps remain unchanged. Committing a Pages build does not itself prove that the user's Pages deployment has been redeployed.
+| Course | Successful time | Attempts |
+|---|---:|---:|
+| Quick Sync | 9.94s | 1 |
+| Reply All | 8.67s | 1 |
+| Mandatory Happiness | 14.87s | 1 |
+| Scope Creep | 7.83s | 1 |
+| The Pivot | 8.83s | 2 |
+| Friday Deployment | 16.56s | 1 |
+| Bandwidth Issues | 8.76s | 1 |
+| Return To Office | 11.38s | 1 |
+| Alignment Workshop | 16.83s | 1 |
+| Exit Interview | 12.84s | 1 |
+| Daily SYNC — 2026-11-04-C02 | 13.05s | 1 |
+
+The course-five capture is present in the raw execution log, not hidden. Earlier development runs also used retries on the final course. Experienced map-aware times are faster than the rough casual 20–45 second intention; no artificial minimum wait is enforced.
+
+## Integration fixes and safeguards
+
+- Separate Phaser scene/model/UI/store rather than changing heist rules.
+- Shared settings correctly pause/resume racing; returning home stops racing and restores heist controls.
+- Space handling avoids the previously discovered document/Phaser default-prevention trap.
+- Pause/focus resume rebases the wall clock; countdown and failed-run auto-retry also freeze on focus loss.
+- Accurate decimal Gold target avoids a rounded UI target disagreeing with a medal boundary.
+- Records treat displayed centisecond ties as ties rather than claiming an invisible PB improvement.
+- Mode-selection shortcuts cannot accidentally restart a stopped previous race.
+- Stage ID namespace keeps racing background caches separate from heist floors.
+
+## Limits and delivery
+
+Local/honor-system records only; no online leaderboard, backend, authentication or anti-cheat. Physical mobile hardware, Safari and Firefox remain untested. Full race timing counts active wall time while physics is bounded on an unusually long frame, so a laggy device is not awarded free time; ordinary browser timing is not a certified competition system. More human playtesting remains useful.
+
+Source and the exact tested docs build are prepared for the same existing main branch. The user handles Pages redeployment; committing files does not itself prove a new Pages deployment. No repository visibility or hosting settings are changed.

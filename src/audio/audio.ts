@@ -80,6 +80,13 @@ export class OfficeAudio {
     const t = ctx.currentTime + 0.005;
     // All events are scheduled on the audio clock. No sfx timeouts/intervals.
     switch (name) {
+      case "meeting-call":
+        // Original office-call motif, not a Microsoft Teams recording/melody.
+        [74, 81, 78, 72, 79, 76].forEach((n, i) => {
+          this.note(n, t + i * 0.1, 0.16, 0.12, "triangle", false);
+          this.note(n - 12, t + i * 0.1, 0.12, 0.035, "sine", false);
+        });
+        break;
       case "step": {
         const pitch = ++this.foot % 2 ? 118 : 101;
         this.tone(pitch, t, 0.055, 0.1, "triangle", false, pitch * 0.65);

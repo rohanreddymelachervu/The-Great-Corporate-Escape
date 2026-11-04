@@ -1,0 +1,106 @@
+{
+  "at": "2026-11-04T06:21:30.426Z",
+  "errors": [],
+  "results": [
+    {
+      "mode": "sprint",
+      "courseId": 1,
+      "attempt": 1,
+      "time": 9.940700000000172,
+      "medal": "Gold",
+      "code": "SPRINT-C01",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 2,
+      "attempt": 1,
+      "time": 8.672699999999702,
+      "medal": "Gold",
+      "code": "SPRINT-C02",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 3,
+      "attempt": 1,
+      "time": 14.877500000000005,
+      "medal": "Gold",
+      "code": "SPRINT-C03",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 4,
+      "attempt": 1,
+      "time": 7.836700000000168,
+      "medal": "Gold",
+      "code": "SPRINT-C04",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 5,
+      "attempt": 2,
+      "time": 8.832100000000072,
+      "medal": "Gold",
+      "code": "SPRINT-C05",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 6,
+      "attempt": 1,
+      "time": 16.568699999999744,
+      "medal": "Gold",
+      "code": "SPRINT-C06",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 7,
+      "attempt": 1,
+      "time": 8.759999999999973,
+      "medal": "Gold",
+      "code": "SPRINT-C07",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 8,
+      "attempt": 1,
+      "time": 11.38009999999963,
+      "medal": "Gold",
+      "code": "SPRINT-C08",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 9,
+      "attempt": 1,
+      "time": 16.830500000000022,
+      "medal": "Gold",
+      "code": "SPRINT-C09",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "sprint",
+      "courseId": 10,
+      "attempt": 1,
+      "time": 12.842000000000004,
+      "medal": "Gold",
+      "code": "SPRINT-C10",
+      "realInputsOnly": true
+    },
+    {
+      "mode": "buzzword",
+      "courseId": 2,
+      "attempt": 1,
+      "time": 13.051800000000757,
+      "medal": "Gold",
+      "word": "SYNC",
+      "code": "2026-11-04-C02",
+      "realInputsOnly": true
+    }
+  ]
+}

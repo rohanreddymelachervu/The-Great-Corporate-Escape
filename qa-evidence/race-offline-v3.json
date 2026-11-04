@@ -1,0 +1,53 @@
+{
+  "at": "2026-11-04T06:17:18.389Z",
+  "reports": [
+    {
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "mobile": false,
+      "dodgeDistance": 73.07350000001725,
+      "redLoss": true,
+      "clockFrozen": true,
+      "autoRetry": true,
+      "wordBadges": 4,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "qaAvailable": false,
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "mobile": true,
+      "dodgeDistance": 116.32649999998287,
+      "redLoss": true,
+      "clockFrozen": true,
+      "autoRetry": true,
+      "wordBadges": 4,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "qaAvailable": false,
+      "errors": []
+    },
+    {
+      "viewport": {
+        "width": 844,
+        "height": 390
+      },
+      "mobile": true,
+      "dodgeDistance": 116.25250000000014,
+      "redLoss": true,
+      "clockFrozen": true,
+      "autoRetry": true,
+      "wordBadges": 4,
+      "canvasMatchesViewport": true,
+      "pageOverflow": false,
+      "qaAvailable": false,
+      "errors": []
+    }
+  ]
+}

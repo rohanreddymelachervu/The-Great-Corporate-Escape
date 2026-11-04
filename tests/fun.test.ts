@@ -15,12 +15,15 @@ describe("judgeClap", () => {
     expect(judgeClap(0.55)).toEqual({ hit: true, points: 100, accuracy: 1 });
   });
 
-  it.each([0.43, 0.67])("includes the window edge %s for 20 points", (position) => {
-    const result = judgeClap(position);
-    expect(result.hit).toBe(true);
-    expect(result.points).toBe(20);
-    expect(result.accuracy).toBeCloseTo(0, 12);
-  });
+  it.each([0.43, 0.67])(
+    "includes the window edge %s for 20 points",
+    (position) => {
+      const result = judgeClap(position);
+      expect(result.hit).toBe(true);
+      expect(result.points).toBe(20);
+      expect(result.accuracy).toBeCloseTo(0, 12);
+    },
+  );
 
   it.each([0.429999, 0.670001, 0, 1, -1, 2])(
     "misses outside the window at %s",

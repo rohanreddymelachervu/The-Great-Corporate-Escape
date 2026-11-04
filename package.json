@@ -1,6 +1,6 @@
 {
   "name": "the-great-office-escape",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -12,7 +12,9 @@
     "typecheck": "tsc --noEmit",
     "format": "prettier --write src tests *.ts index.html scripts",
     "test:release": "node scripts/release-smoke.mjs",
-    "test:campaign": "node scripts/campaign-playtest.mjs"
+    "test:campaign": "node scripts/campaign-playtest.mjs",
+    "test:races": "node scripts/race-playtest.mjs",
+    "test:race-release": "node scripts/race-release-smoke.mjs"
   },
   "dependencies": {
     "phaser": "3.90.0"

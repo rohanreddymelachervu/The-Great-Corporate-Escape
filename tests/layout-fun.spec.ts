@@ -33,7 +33,7 @@ for (const viewport of [
     });
     const page = await context.newPage();
     await load(page);
-    await page.getByRole("button", { name: "CLOCK OUT" }).click();
+    await page.locator("#play-btn").click();
     await page.waitForTimeout(500);
     const layout = await page.evaluate(() => {
       const box = (id: string) => {

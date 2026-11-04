@@ -1,0 +1,836 @@
+/* Racing is an isolated layout, not another layer over the heist HUD. */
+body.racing #topbar {
+  height: 58px;
+}
+body.racing #top-status,
+body.racing #footer {
+  display: none;
+}
+body.racing #stage {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-areas: "racebar" "map" "racedock";
+}
+body.racing #game {
+  grid-area: map;
+}
+body.racing .wordmark small {
+  display: none;
+}
+#race-top {
+  grid-area: racebar;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px 24px;
+  align-items: center;
+  padding: 12px 24px;
+  background: #172335;
+  border-bottom: 1px solid #506070;
+  min-width: 0;
+  color: #eeeade;
+  font-family: "IBM Plex Mono", monospace;
+}
+.race-heading {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.race-heading small {
+  font-size: 9px;
+  color: #a9f4ce;
+  letter-spacing: 1.5px;
+}
+.race-heading strong {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 27px;
+  line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.race-heading > span {
+  font-size: 10px;
+  color: #becbd4;
+  line-height: 1.5;
+}
+.race-clock {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+.race-clock small {
+  font-size: 8px;
+  color: #c3cdd7;
+  letter-spacing: 1px;
+}
+.race-clock strong {
+  font-size: 32px;
+  line-height: 1;
+  color: #ffdf9e;
+  letter-spacing: -1px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.race-target {
+  display: grid;
+  gap: 8px;
+  text-align: right;
+}
+.race-target small {
+  font-size: 10px;
+  color: #e6d2aa;
+}
+.race-target span {
+  font-size: 10px;
+  color: #a9f4ce;
+}
+#race-word-row {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding-top: 8px;
+  border-top: 1px solid #354c60;
+}
+#race-letter-count {
+  font-size: 10px;
+  color: #cbd4dc;
+}
+#race-letter-slots {
+  display: flex;
+  gap: 5px;
+}
+#race-letter-slots span,
+.race-preview-word span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 28px;
+  border: 1px solid #64758b;
+  font-size: 16px;
+  color: #8b9cad;
+  background: #223047;
+}
+#race-letter-slots .collected {
+  background: #a9f4ce;
+  color: #183930;
+  border-color: #c6ffe2;
+}
+#race-notice {
+  grid-column: 1/-1;
+  color: #ffcf9e;
+  font-size: 11px;
+  margin: 0;
+}
+#race-dock {
+  grid-area: racedock;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 8px 24px;
+  background: #151f30;
+  border-top: 1px solid #46596e;
+  min-width: 0;
+}
+.race-control-guide {
+  margin: 0;
+  font-size: 9px;
+  color: #bbcad5;
+  line-height: 1.8;
+}
+.race-control-guide kbd {
+  font-size: 9px;
+  margin: 0 6px 0 12px;
+  color: #a9f4ce;
+}
+.race-control-guide kbd:first-child {
+  margin-left: 0;
+}
+#race-joystick,
+.race-touch-actions {
+  display: none;
+}
+#race-joystick {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border: 1px solid #a9f4ce88;
+  border-radius: 50%;
+  background: #294a4b99;
+  touch-action: none;
+  user-select: none;
+  flex-shrink: 0;
+}
+#race-stick {
+  position: absolute;
+  left: 24px;
+  top: 24px;
+  width: 30px;
+  height: 30px;
+  border: 2px solid #d2ffe6;
+  border-radius: 50%;
+  background: #a9f4ce99;
+}
+#race-joystick small {
+  position: absolute;
+  bottom: 3px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  font-size: 8px;
+  color: #e5eee7;
+}
+.race-touch-actions {
+  gap: 12px;
+  align-items: center;
+}
+.race-touch-actions button {
+  width: 60px;
+  height: 60px;
+  border: 1px solid #a9f4ce;
+  border-radius: 50%;
+  color: #a9f4ce;
+  background: #24424b;
+  font-size: 11px;
+  touch-action: none;
+  user-select: none;
+}
+#race-touch-dash {
+  background: #493249;
+  border-color: #ffb4d2;
+  color: #ffdeeb;
+  font-weight: 600;
+}
+#race-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #0b1426cc;
+  backdrop-filter: blur(3px);
+  overflow: auto;
+  color: #f0eddf;
+}
+.race-panel {
+  position: relative;
+  max-width: 830px;
+  width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  padding: 32px;
+  background: #1b293d;
+  border: 1px solid #788798;
+  box-shadow: 8px 8px 0 #0b152680;
+}
+.race-panel h2 {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 56px;
+  line-height: 0.94;
+  font-weight: 800;
+  margin: 12px 0 18px;
+  letter-spacing: 0.3px;
+}
+.race-panel p {
+  font-size: 12px;
+  line-height: 1.8;
+  color: #cbd7dc;
+}
+.race-eyebrow {
+  font-size: 10px;
+  line-height: 1.5;
+  letter-spacing: 1.5px;
+  color: #a9f4ce;
+}
+.race-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+.race-primary,
+.race-secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 17px;
+  font:
+    600 11px "IBM Plex Mono",
+    monospace;
+  letter-spacing: 0.4px;
+}
+.race-primary {
+  background: #a9f4ce;
+  color: #17372f;
+  border: 1px solid #baffdc;
+  box-shadow: 3px 3px 0 #4c7866;
+}
+.race-secondary {
+  border: 1px solid #75849b;
+  background: #203148;
+  color: #e0e6df;
+}
+.race-course-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin-top: 20px;
+}
+.race-course-card {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 14px;
+  text-align: left;
+  background: #203147;
+  border: 1px solid #526a7d;
+  min-width: 0;
+  min-height: 88px;
+}
+.race-course-card:hover {
+  border-color: #a9f4ce;
+}
+.race-course-card > b {
+  font:
+    600 28px "Barlow Condensed",
+    sans-serif;
+  color: #a9f4ce;
+  flex-shrink: 0;
+}
+.race-course-card > span {
+  min-width: 0;
+  flex: 1;
+}
+.race-course-card strong {
+  display: block;
+  font-size: 12px;
+  color: #f0eddf;
+}
+.race-course-card small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #b5c5d0;
+  margin-top: 5px;
+}
+.race-course-card em {
+  font-size: 10px;
+  font-style: normal;
+  white-space: nowrap;
+  color: #ffe0a0;
+  text-align: right;
+}
+.race-course-card em small {
+  font-size: 8px;
+}
+.race-fine {
+  font-size: 10px !important;
+  color: #aec4c8 !important;
+  overflow-wrap: anywhere;
+}
+.race-preview-word {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin: 22px 0;
+}
+.race-preview-word span {
+  height: 38px;
+  width: 34px;
+  color: #f8dfaa;
+  border-color: #9e8d73;
+}
+.race-finish-mark {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  color: #a9f4ce;
+  border: 3px solid #a9f4ce;
+  box-shadow: 4px 4px 0 #426b5b;
+  font-size: 36px;
+  margin: 20px 0;
+}
+.race-finish-time {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 64px;
+  color: #a9f4ce;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -3px;
+}
+.race-medal {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: #ffe2a3;
+  margin-top: 13px;
+}
+.race-revealed-word {
+  font-family: "Barlow Condensed", sans-serif;
+  letter-spacing: 5px;
+  font-size: 45px;
+  color: #ffbe99;
+  margin-top: 20px;
+}
+.race-review {
+  font-size: 9px;
+  color: #a9bdcc;
+  border-top: 1px solid #516177;
+  border-bottom: 1px solid #516177;
+  margin-top: 22px;
+  padding: 15px 0;
+  line-height: 1.8;
+}
+.race-review b {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #e8e7db;
+}
+.race-review small {
+  font-size: 10px;
+  color: #bec8d3;
+}
+#race-modal.race-countdown {
+  pointer-events: none;
+  background: transparent;
+  backdrop-filter: none;
+}
+.race-ready {
+  display: grid;
+  gap: 12px;
+  text-align: center;
+  text-shadow: 3px 3px 0 #17243e;
+}
+.race-ready b {
+  font:
+    800 130px/1 "Barlow Condensed",
+    sans-serif;
+  color: #a9f4ce;
+}
+.race-ready span {
+  font-size: 12px;
+  background: #17243eee;
+  color: #e9e9dc;
+  padding: 9px 17px;
+  border: 1px solid #a9f4ce66;
+}
+/* Deliberately red, never a flashing/strobing punishment. */
+#race-modal.race-punishment {
+  padding: 0;
+  background: #651c2b;
+  backdrop-filter: none;
+  overflow: hidden;
+}
+.race-punishment-panel {
+  max-width: none;
+  max-height: none;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #631b2a;
+  box-shadow: none;
+}
+.race-jargon-wall {
+  position: absolute;
+  inset: -30px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  align-content: center;
+  transform: rotate(-9deg);
+  opacity: 0.3;
+  pointer-events: none;
+  user-select: none;
+}
+.race-jargon-wall span {
+  font-family: "Barlow Condensed", sans-serif;
+  font-weight: 800;
+  font-size: clamp(16px, 2.2vw, 34px);
+  line-height: 1.1;
+  color: #ffabb1;
+  animation: corporate-stamp 0.5s ease-out both;
+  animation-delay: calc(var(--n) * 0.012s);
+}
+.race-failure-copy {
+  position: relative;
+  text-align: center;
+  max-width: 650px;
+  width: 90%;
+  padding: 25px;
+  background: #5f1b29ee;
+  border: 2px solid #ff9a9e;
+  box-shadow: 7px 7px 0 #2f1021;
+}
+.race-failure-copy .race-eyebrow {
+  color: #ffdfce;
+  font-size: 10px;
+}
+.race-failure-copy h2 {
+  font-size: 70px;
+  color: #fff0df;
+  margin: 12px 0;
+}
+.race-failure-copy p {
+  font-size: 12px;
+  color: #ffddd0;
+  margin: 8px 0;
+}
+.race-failure-copy .race-primary {
+  background: #ffd3bf;
+  color: #57212c;
+  border-color: #fff1d6;
+  box-shadow: 3px 3px 0 #aa5d62;
+  margin: 18px auto 12px;
+}
+.race-failure-copy small {
+  display: block;
+  color: #ffd5c8;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.racing-mode-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+  margin: 16px 0;
+  max-width: 560px;
+}
+.racing-mode-options button {
+  display: grid;
+  gap: 5px;
+  border: 1px solid #829baf;
+  background: #1c3042e8;
+  padding: 12px 15px;
+  text-align: left;
+  min-height: 64px;
+}
+.racing-mode-options strong {
+  font-family: "Barlow Condensed", sans-serif;
+  font-size: 23px;
+  color: #b7f7d3;
+  letter-spacing: 0.6px;
+}
+.racing-mode-options small {
+  font-size: 9px;
+  line-height: 1.5;
+  color: #c5d0d8;
+}
+.racing-mode-options button:last-child strong {
+  color: #ffe0a0;
+}
+.race-mode-label {
+  font-size: 9px;
+  color: #9cb6c8;
+  letter-spacing: 1px;
+  margin-top: 15px;
+}
+@keyframes corporate-stamp {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(1.1);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@media (max-width: 850px) {
+  #race-top {
+    padding: 10px 14px;
+    gap: 10px 15px;
+  }
+  .race-heading strong {
+    font-size: 23px;
+  }
+  .race-clock strong {
+    font-size: 28px;
+  }
+  .race-target small,
+  .race-target span {
+    font-size: 9px;
+  }
+  .race-course-grid {
+    grid-template-columns: 1fr;
+  }
+  .race-panel {
+    max-width: 650px;
+  }
+}
+@media (max-width: 600px) {
+  body.racing #topbar {
+    height: 52px;
+  }
+  #race-top {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding: 9px 12px;
+  }
+  .race-heading strong {
+    font-size: 22px;
+  }
+  .race-heading small {
+    font-size: 8px;
+    letter-spacing: 0.7px;
+  }
+  .race-heading > span {
+    font-size: 9px;
+  }
+  .race-clock strong {
+    font-size: 25px;
+  }
+  .race-clock small {
+    font-size: 6px;
+    letter-spacing: 0;
+  }
+  .race-target {
+    grid-column: 1/-1;
+    display: flex;
+    justify-content: space-between;
+    font-size: 9px;
+  }
+  .race-target small,
+  .race-target span {
+    font-size: 9px;
+  }
+  #race-word-row {
+    gap: 9px;
+    padding-top: 6px;
+  }
+  #race-letter-count {
+    font-size: 8px;
+  }
+  #race-letter-slots {
+    gap: 4px;
+  }
+  #race-letter-slots span {
+    width: 23px;
+    height: 25px;
+    font-size: 14px;
+  }
+  #race-dock {
+    padding: 8px 18px;
+    min-height: 96px;
+  }
+  .race-control-guide {
+    display: none;
+  }
+  #race-joystick,
+  .race-touch-actions {
+    display: flex;
+  }
+  .race-touch-actions {
+    gap: 12px;
+  }
+  #race-modal {
+    padding: 12px;
+  }
+  .race-panel {
+    padding: 25px 19px;
+  }
+  .race-panel h2 {
+    font-size: 46px;
+  }
+  .race-panel p {
+    font-size: 11px;
+  }
+  .race-course-card {
+    padding: 12px;
+    gap: 10px;
+  }
+  .race-course-card strong {
+    font-size: 12px;
+  }
+  .race-course-card small {
+    font-size: 9px;
+  }
+  .race-course-card em {
+    font-size: 9px;
+  }
+  .race-finish-time {
+    font-size: 46px;
+    letter-spacing: -2px;
+  }
+  .race-revealed-word {
+    font-size: 36px;
+    letter-spacing: 3px;
+  }
+  .race-failure-copy {
+    padding: 20px 13px;
+    width: 91%;
+  }
+  .race-failure-copy h2 {
+    font-size: 51px;
+  }
+  .race-failure-copy p {
+    font-size: 11px;
+  }
+  .race-failure-copy small {
+    font-size: 9px;
+  }
+  .race-jargon-wall {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .racing-mode-options {
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+  }
+  .racing-mode-options button {
+    padding: 10px;
+  }
+  .racing-mode-options strong {
+    font-size: 21px;
+  }
+  .racing-mode-options small {
+    font-size: 8px;
+  }
+}
+@media (pointer: coarse) {
+  #race-joystick,
+  .race-touch-actions {
+    display: flex;
+  }
+  .race-control-guide {
+    display: none;
+  }
+}
+@media (max-height: 540px) and (min-width: 601px) {
+  body.racing #topbar {
+    height: 44px;
+  }
+  #race-top {
+    padding: 7px 14px;
+    gap: 6px 15px;
+  }
+  .race-heading strong {
+    font-size: 21px;
+  }
+  .race-heading > span {
+    font-size: 9px;
+  }
+  .race-clock strong {
+    font-size: 26px;
+  }
+  .race-target small,
+  .race-target span {
+    font-size: 8px;
+  }
+  #race-word-row {
+    padding-top: 4px;
+    gap: 12px;
+  }
+  #race-letter-slots span {
+    height: 22px;
+    width: 22px;
+    font-size: 13px;
+  }
+  #race-dock {
+    padding: 5px 18px;
+    min-height: 75px;
+  }
+  #race-joystick {
+    width: 64px;
+    height: 64px;
+  }
+  #race-stick {
+    left: 17px;
+    top: 17px;
+    width: 28px;
+    height: 28px;
+  }
+  .race-touch-actions button {
+    width: 53px;
+    height: 53px;
+  }
+  #race-modal {
+    padding: 10px;
+  }
+  .race-panel {
+    padding: 20px 24px;
+  }
+  .race-panel h2 {
+    font-size: 39px;
+    margin: 9px 0 13px;
+  }
+  .race-panel p {
+    font-size: 10px;
+    line-height: 1.6;
+  }
+  .race-course-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .race-course-card {
+    min-height: 74px;
+    padding: 10px;
+  }
+  .race-course-card strong {
+    font-size: 11px;
+  }
+  .race-course-card small {
+    font-size: 8px;
+  }
+  .race-finish-mark {
+    display: none;
+  }
+  .race-finish-time {
+    font-size: 44px;
+  }
+  .race-actions {
+    margin-top: 15px;
+    gap: 8px;
+  }
+  .race-primary,
+  .race-secondary {
+    font-size: 10px;
+    min-height: 44px;
+    padding: 9px 13px;
+  }
+  .race-failure-copy {
+    padding: 15px 20px;
+    max-width: 720px;
+  }
+  .race-failure-copy h2 {
+    font-size: 49px;
+    margin: 6px 0;
+  }
+  .race-failure-copy p {
+    font-size: 10px;
+    margin: 6px 0;
+  }
+  .race-failure-copy .race-primary {
+    margin: 12px auto 9px;
+  }
+  .race-review {
+    margin-top: 12px;
+    padding: 10px 0;
+  }
+  .racing-mode-options {
+    grid-column: 2;
+    grid-row: auto;
+    margin: 5px 0;
+  }
+  .racing-mode-options strong {
+    font-size: 20px;
+  }
+  .race-mode-label {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .race-jargon-wall span {
+    animation: none !important;
+  }
+}
+
+body.race-reduced .race-jargon-wall span {
+  animation: none !important;
+}

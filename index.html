@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#111827" />
     <meta
       name="description"
-      content="Friday. 4:59 PM. Your work is done. Escape five floors of startup culture in this free pixel-art stealth game."
+      content="Escape startup culture in Office Heist, race ten Clock Out Sprint courses, or collect the daily corporate word in Buzzword Run. Free, client-side pixel-art gameplay."
     />
     <title>The Great Office Escape · 4:59 PM</title>
   </head>
@@ -76,6 +76,7 @@
               You’ve finished your work.<br />Unfortunately,
               <em>nobody else has.</em>
             </p>
+            <div class="race-mode-label">OFFICE HEIST · LOOT + SURVIVAL</div>
             <div class="menu-buttons">
               <button id="play-btn" class="primary">
                 CLOCK OUT <span>↗</span></button
@@ -89,8 +90,21 @@
                 >
               </button>
             </div>
+            <div class="race-mode-label">
+              SEPARATE RACES · TIME ONLY · NO LOOT OR TOOLS
+            </div>
+            <div class="racing-mode-options">
+              <button id="sprint-mode-btn" aria-label="Clock Out Sprint">
+                <strong>CLOCK OUT SPRINT ↗</strong
+                ><small>Ten short courses. Exit fast.</small></button
+              ><button id="buzzword-mode-btn" aria-label="Buzzword Run">
+                <strong>BUZZWORD RUN ↻</strong
+                ><small>Daily letters. Corporate nonsense.</small>
+              </button>
+            </div>
             <p class="escape-route">
-              Call the lift <span>→</span> dodge the office <span>→</span> board
+              HEIST: Call the lift <span>→</span> dodge the office
+              <span>→</span> board
             </p>
             <div class="menu-links">
               <button id="floors-btn">CHOOSE FLOOR <span>01—05</span></button
@@ -112,7 +126,7 @@
             ><span>YOUR OFFICE.<br /><b>YOUR FINAL BOSS.</b></span>
           </div>
           <div class="menu-stamp">
-            <span class="status-dot"></span> V2.2 · MOVE. USE. DODGE. ESCAPE.
+            <span class="status-dot"></span> V3.0 · HEIST / SPRINT / BUZZWORD
           </div>
         </div>
         <aside id="hud" hidden aria-label="Escape objectives and status">
@@ -192,7 +206,7 @@
       <footer id="footer">
         <span>A STEALTH GAME ABOUT THE MOST DANGEROUS TIME OF THE WEEK.</span
         ><span
-          >5 FLOORS <i>/</i> 6 CORPORATE THREATS <i>/</i> ZERO UNPAID
+          >5 HEIST FLOORS <i>/</i> 10 SPRINT COURSES <i>/</i> ZERO UNPAID
           OVERTIME</span
         >
       </footer>

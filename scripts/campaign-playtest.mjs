@@ -47,7 +47,7 @@ if (firstFloor > 1) {
     ({ level, seed }) => window.__office.qa.start(level, seed),
     { level: firstFloor, seed: process.env.PLAYTEST_SEED || "focused-v2" },
   );
-} else await page.getByRole("button", { name: "CLOCK OUT" }).click();
+} else await page.locator("#play-btn").click();
 const state = () => page.evaluate(() => window.__office.snapshot());
 const held = new Set();
 let lastAction = -10;

@@ -17,6 +17,9 @@ import { playFunFriday } from "./ui/fun-ui";
 import type { FunOutcome } from "./ui/fun-ui";
 import { ContextCoach } from "./game/coach";
 import { incidentReport } from "./game/report";
+import { SprintScene } from "./sprint/scene";
+import { setupSprintModes } from "./sprint/ui";
+import type { SprintController } from "./sprint/ui";
 const $ = <T extends HTMLElement = HTMLElement>(s: string) =>
   document.querySelector<T>(s)!;
 const save = load(),
@@ -24,6 +27,8 @@ const save = load(),
 audio.setVolumes(save.settings.music, save.settings.sfx, save.settings.mute);
 audio.music("menu");
 const scene = new OfficeScene(audio);
+const sprintScene = new SprintScene(audio);
+let sprintUi: SprintController | null = null;
 scene.reducedMotion =
   save.settings.reducedMotion ||
   matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -41,7 +46,7 @@ const game = new Phaser.Game({
   },
   render: { powerPreference: "low-power", transparent: false },
   fps: { target: 60, forceSetTimeOut: false },
-  scene: [scene],
+  scene: [scene, sprintScene],
   banner: false,
   audio: { noAudio: true },
   input: { activePointers: 4 },
@@ -194,12 +199,16 @@ function closeModal() {
   $("#modal-root").hidden = true;
   $("#modal-root").innerHTML = "";
   modalKind = "";
-  if (kind !== "result") resume();
+  if (kind !== "result") {
+    if (sprintUi?.isActive()) sprintUi.resumeExternal();
+    else resume();
+  }
   $("#game").focus();
 }
 function modal(kind: string, html: string, small = false) {
   stopHit(true);
   stopFun();
+  if (sprintUi?.isActive()) sprintUi.pauseExternal();
   if (playing && !scene.ended) pause();
   modalKind = kind;
   $("#toast").hidden = true;
@@ -213,6 +222,7 @@ function modal(kind: string, html: string, small = false) {
     );
 }
 function start(level: number, daily = false, seedOverride?: string) {
+  sprintUi?.stop();
   stopHit(false);
   stopFun();
   audio.resume();
@@ -254,6 +264,7 @@ function home() {
   } else goHome();
 }
 function goHome() {
+  sprintUi?.stop();
   stopHit(false);
   stopFun();
   audio.resume();
@@ -589,7 +600,7 @@ function achievements() {
 function settings() {
   modal(
     "settings",
-    `<div class="modal-eyebrow">YOUR OFFICE. YOUR TERMS.</div><h2>SET BOUNDARIES.</h2><label class="setting-row">Music <input id="music-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.music}" aria-label="Music volume"></label><label class="setting-row">Sound effects <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.sfx}" aria-label="Sound effects volume"></label><label class="setting-row">Mute all audio <input id="mute-check" type="checkbox" ${save.settings.mute ? "checked" : ""}></label><label class="setting-row">Reduced motion <input id="motion-check" type="checkbox" ${save.settings.reducedMotion ? "checked" : ""}></label><label class="setting-row">Hit scene length <select id="hit-scene-mode" aria-label="Hit scene length"><option value="brief" ${save.settings.hitScenes === "brief" ? "selected" : ""}>Brief · ~1 second</option><option value="long" ${save.settings.hitScenes === "long" ? "selected" : ""}>Long haul · ~3–4 seconds</option></select></label><label class="setting-row">Context tips <input id="tips-check" type="checkbox" ${save.settings.tips ? "checked" : ""}></label><p>Each hit shows its own animated event. The office pauses; E or tap skips.</p><p>Progress is saved locally on this browser. No accounts, trackers, AI calls, or meetings required.</p><div class="modal-actions"><button id="settings-done" class="primary">DONE ↗</button></div>`,
+    `<div class="modal-eyebrow">YOUR OFFICE. YOUR TERMS.</div><h2>SET BOUNDARIES.</h2><label class="setting-row">Music <input id="music-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.music}" aria-label="Music volume"></label><label class="setting-row">Sound effects <input id="sfx-volume" type="range" min="0" max="1" step="0.05" value="${save.settings.sfx}" aria-label="Sound effects volume"></label><label class="setting-row">Mute all audio <input id="mute-check" type="checkbox" ${save.settings.mute ? "checked" : ""}></label><label class="setting-row">Reduced motion <input id="motion-check" type="checkbox" ${save.settings.reducedMotion ? "checked" : ""}></label><label class="setting-row">Hit scene length (heist only) <select id="hit-scene-mode" aria-label="Hit scene length"><option value="brief" ${save.settings.hitScenes === "brief" ? "selected" : ""}>Brief · ~1 second</option><option value="long" ${save.settings.hitScenes === "long" ? "selected" : ""}>Long haul · ~3–4 seconds</option></select></label><label class="setting-row">Context tips <input id="tips-check" type="checkbox" ${save.settings.tips ? "checked" : ""}></label><p>Heist hits show their own animated event. Racing losses use a quick red call-screen instead. Audio and reduced motion apply to every mode.</p><p>Progress is saved locally on this browser. No accounts, trackers, AI calls, or meetings required.</p><div class="modal-actions"><button id="settings-done" class="primary">DONE ↗</button></div>`,
     true,
   );
   $("#music-volume").oninput = () => {
@@ -608,6 +619,8 @@ function settings() {
   $("#motion-check").onchange = () => {
     save.settings.reducedMotion = $<HTMLInputElement>("#motion-check").checked;
     scene.reducedMotion = save.settings.reducedMotion;
+    sprintScene.reducedMotion = scene.reducedMotion;
+    document.body.classList.toggle("race-reduced", scene.reducedMotion);
     persist(save);
   };
   $("#hit-scene-mode").onchange = () => {
@@ -742,6 +755,11 @@ document.addEventListener("keydown", (e) => {
   if (e.code === "KeyM" && !e.repeat) {
     save.settings.mute = !save.settings.mute;
     applySettings();
+  }
+  if (e.code === "Escape" && sprintUi?.isActive() && !modalKind) {
+    e.preventDefault();
+    sprintUi.togglePause();
+    return;
   }
   if (e.code === "Escape") {
     e.preventDefault();
@@ -895,9 +913,57 @@ Object.defineProperty(window, "__office", {
 });
 // Display the hand-drawn office immediately; menu never runs an active stealth simulation.
 game.events.once("ready", () => {
-  scene.scene.restart({ level: 5, preview: true, seed: "menu" });
+  if (!sprintUi?.isActive())
+    scene.scene.restart({ level: 5, preview: true, seed: "menu" });
 });
 setTimeout(() => {
-  if (!playing && scene.scene.isActive() && !scene.preview)
+  if (
+    !playing &&
+    !sprintUi?.isActive() &&
+    scene.scene.isActive() &&
+    !scene.preview
+  )
     scene.scene.restart({ level: 5, preview: true, seed: "menu" });
 }, 150);
+
+sprintUi = setupSprintModes({
+  game,
+  scene: sprintScene,
+  audio,
+  onEnter: () => {
+    stopHit(false);
+    stopFun();
+    playing = false;
+    paused = false;
+    modalKind = "";
+    $("#modal-root").hidden = true;
+    $("#modal-root").innerHTML = "";
+    $("#toast").hidden = true;
+  },
+  onReturn: goHome,
+  externalModal: () => !!modalKind,
+  reducedMotion: () => scene.reducedMotion,
+});
+const raceInspection: {
+  snapshot: () => unknown;
+  ready: () => boolean;
+  qa?: unknown;
+} = {
+  snapshot: () => sprintScene.snapshot(),
+  ready: () =>
+    sprintScene.scene.isActive() &&
+    !!sprintScene.player &&
+    !!sprintUi?.isActive(),
+};
+if (import.meta.env.DEV && new URLSearchParams(location.search).has("qa"))
+  raceInspection.qa = {
+    start: (options: import("./sprint/types").RaceOptions) =>
+      sprintUi?.start(options),
+    position: (x: number, y: number) => {
+      if (sprintScene.run) sprintScene.run.pos = { x, y };
+    },
+  };
+Object.defineProperty(window, "__sprint", {
+  value: raceInspection,
+  writable: false,
+});

@@ -234,10 +234,16 @@ describe("pursuit and counterplay", () => {
     expect(c.spot).toHaveBeenCalledTimes(1);
     expect(e.state).toBe("chase");
   });
-  it('investigates outside personal space long enough to actually notice a stationary employee',()=>{
-    const {enemy:e,context:c}=setup('hr');c.player={x:160,y:100};e.investigate(c.player,6);
-    tick(e,c,60);expect(dist(e,c.player)).toBeGreaterThan(29);expect(c.catch).not.toHaveBeenCalled();
-    tick(e,c,80);expect(c.spot).toHaveBeenCalled();expect(c.catch).toHaveBeenCalled();
+  it("investigates outside personal space long enough to actually notice a stationary employee", () => {
+    const { enemy: e, context: c } = setup("hr");
+    c.player = { x: 160, y: 100 };
+    e.investigate(c.player, 6);
+    tick(e, c, 60);
+    expect(dist(e, c.player)).toBeGreaterThan(29);
+    expect(c.catch).not.toHaveBeenCalled();
+    tick(e, c, 80);
+    expect(c.spot).toHaveBeenCalled();
+    expect(c.catch).toHaveBeenCalled();
   });
   it("proximity awareness does not penetrate walls", () => {
     const { enemy: e, context: c } = setup();

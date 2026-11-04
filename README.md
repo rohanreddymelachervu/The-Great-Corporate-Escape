@@ -1,4 +1,4 @@
-# THE GREAT OFFICE ESCAPE: 4:59 PM — Clearer Escapes v2.2
+# THE GREAT OFFICE ESCAPE: 4:59 PM — Three Ways to Clock Out v3.0
 
 > You've finished your work. Unfortunately, nobody else has.
 
@@ -8,7 +8,40 @@ A client-side Phaser 3 + TypeScript + Vite office-escape game. No backend, accou
 
 **Deployable GitHub Pages build:** `docs/index.html` on `main`. The source and rebuilt `docs` are committed to the existing `rohanreddymelachervu/The-Great-Corporate-Escape` repository. This update does not change hosting settings; redeploy your existing Pages setup from that folder.
 
-## New in v2.2: more personality, less homework
+## New in v3.0: two separate time-only racing modes
+
+The original Office Heist remains available with its existing maps, loot, abilities, difficulty, records and animations. New racing records are stored independently.
+
+### CLOCK OUT SPRINT
+
+Choose any of **ten short authored courses**. Move with WASD/arrows or joystick, sprint with Shift/RUN, dodge with Space/DASH. Reach the always-open exit as fast as possible. No loot, distractions/abilities, Corporate BS, stamina meter, lift wait or heist hit cutaway.
+
+Your result is **active race time**, displayed in hundredths. Lower is better; records and medal boundaries agree with that display precision. Countdown, pause and loss-screen time do not count. Gold/Silver targets are per course. All ten courses are selectable without affecting heist unlocks; Next Course provides a natural difficulty progression through timing, route choices and readable pattern combinations.
+
+A catch stops the clock and triggers a **deep-red corporate-jargon punishment wall** with an original meeting-call chime, then an automatic quick retry of the same course/pattern. R/Space or Retry can return sooner after a short guard. The cue is original WebAudio, **not an embedded Microsoft Teams recording or copied ringtone**. Mute and SFX volume apply. There is no flashing punishment; reduced motion removes word-stamp animation.
+
+The ten courses are Quick Sync, Reply All, Mandatory Happiness, Scope Creep, The Pivot, Friday Deployment, Bandwidth Issues, Return To Office, Alignment Workshop and Exit Interview. Experienced map-aware play can clear them much faster than a new exploratory player; there is no forced minimum wait.
+
+### BUZZWORD RUN
+
+A separate **UTC-daily letter race**. Everyone on the same build gets the same authored course, corporate word, letter locations and hazard patterns for that date. Run over letter badges **in any order**; slots fill their correct positions automatically, including repeated letters. The exit unlocks after every badge is collected. No spelling menu, E interaction, loot or bonus points.
+
+Sixteen curated 4–7-letter corporate words have finish-screen punchlines. Examples: SYNERGY — “Two departments, twice the meetings”; PIVOT — “The original plan has left the chat”; SCOPE — “It grew while you were reading this.” Where a template has a genuine side pocket, the daily placement includes one instead of merely repeating the pure exit line.
+
+Pure sprint, daily buzzword dates and heist scores never share a leaderboard bucket. Records are local, and Share Time copies/shares the course/word, time, medal and daily challenge code. There is **no online leaderboard or anti-cheat service**. Pausing freezes the race; focus loss also freezes countdown and failed-run retry rather than advancing unseen.
+
+Finish screens include a deliberately unhelpful corporate performance review. Compensation remains unchanged.
+
+### Racing development checks
+
+```sh
+npm run test:races          # Real-input production traversal: ten courses + today's letters
+npm run test:race-release   # Offline desktop + both touch orientations; loss/retry and daily startup
+```
+
+The race playtester reads the read-only inspector and uses actual keyboard input. It knows the authored maps, can retry at most eight times, and varies its departure timing on retries; it does not move the player or mutate health/clock/win state.
+
+## Office Heist UX retained from v2.2
 
 The underlying v2.1 difficulty tuning is retained: enemy speeds/damage/vision, tool cooldowns/durations, lift waits, maps, patrol routes, staff counts and meeting schedules are regression-tested against qa-evidence/difficulty-v21.json. No stronger enemies or compensating difficulty buffs were added.
 
@@ -131,7 +164,7 @@ Build outputs:
 - `release/office-escape.html`: portable offline single-file game.
 - `docs/index.html` and `docs/.nojekyll`: the same game prepared for branch-based GitHub Pages. `docs` is intentionally committed.
 
-The approximately 1.97 MB uncompressed release contains Phaser, fonts, artwork code, audio code and legal notices. The large-chunk warning is expected: runtime CDN dependency was deliberately avoided.
+The approximately 2.04 MB uncompressed release contains Phaser, fonts, artwork code, audio code and legal notices. The large-chunk warning is expected: runtime CDN dependency was deliberately avoided.
 
 ```sh
 npx playwright install chromium
@@ -143,8 +176,8 @@ npm run test:campaign
 
 `CHROMIUM_PATH` optionally selects an existing Chromium executable. Otherwise Playwright uses its managed browser.
 
-- **739 unit/data tests:** geometry, navigation, saves, RNG, maps, sixty-three encounter-director checks, seventy-two enemy checks, thirty-two meeting-traffic checks, twenty loot checks, HR rhythm logic legacy-score migration, a twenty-one-check social model, and eleven UX/difficulty/report checks.
-- **47 browser journeys:** actual keyboard and touch dodges, arrow/WASD movement, windup/locked-aim behavior, warnings before hits, real hazard dodge credit, camping consequences, lift timing/boarding, optional sabotage, recovery, alternative WFH, loss/retry, settings, daily seed, responsive bounds HR activity success/failure, all eight animated hit scenes, lethal-hit recovery, long-haul skipping, held theft, snack recovery, bank/loss rules and real meeting-room walkouts.
+- **824 unit/data tests across the app:** geometry, navigation, saves, RNG, maps, sixty-three encounter-director checks, seventy-two enemy checks, thirty-two meeting-traffic checks, twenty loot checks, HR rhythm logic legacy-score migration, a twenty-one-check social model, and eleven UX/difficulty/report checks.
+- **58 browser journeys across the app:** actual keyboard and touch dodges, arrow/WASD movement, windup/locked-aim behavior, warnings before hits, real hazard dodge credit, camping consequences, lift timing/boarding, optional sabotage, recovery, alternative WFH, loss/retry, settings, daily seed, responsive bounds HR activity success/failure, all eight animated hit scenes, lethal-hit recovery, long-haul skipping, held theft, snack recovery, bank/loss rules and real meeting-room walkouts.
 - **Three offline production checks:** desktop plus portrait/landscape touch startup, input, dodge, coffee and pause with network disabled and no production QA helpers.
 - **Real-input production campaign:** the map-aware controller plays all five floors without positioning, health, timer or win hooks. It can attempt a floor at most three times, using actual optional sabotage after a failed attempt; failures are recorded, not hidden. Focused development runs may explicitly skip unlocks, but full production runs do not.
 
@@ -153,7 +186,13 @@ The previous Space/arrow default-prevention bug was found through browser input 
 ## Architecture
 
 ```
-src/main.ts                  Menus, input, overlays, progression and lifecycle
+src/main.ts                  Shared lifecycle/settings and unchanged heist UI
+src/sprint/scene.ts          Separate Phaser racing scene, input and visuals
+src/sprint/model.ts          Pure movement/timer/capture/daily-word model
+src/sprint/courses.ts        Ten distinct authored courses and legal letter sites
+src/sprint/ui.ts             Race selection, minimal HUD, red failure/retry, results
+src/sprint/progression.ts    Independent raw-time records and daily history
+src/sprint/style.css         Isolated responsive racing UI and jargon wall
 src/game/scene.ts            Fixed-step run, movement, abilities, lift interaction, effects
 src/game/director.ts         Pure seeded interference, warning/hit rules, lift/boarding clock
 src/game/traffic.ts          Seeded meeting-room walkout/return, spotting and interruption
